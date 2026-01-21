@@ -34,10 +34,12 @@ const initialParams: VideoListQueryParams = {
 
 <Layout title="Yoga & Fitness - Strona Główna">
   <Navbar />
-  <main class="container mx-auto px-4 py-8">
-    <header class="mb-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-slate-100 mb-2">Odkryj swoje ćwiczenia</h1>
-      <p class="text-slate-400 text-lg">Przeglądaj nagrania z yogi, mobilności i kalisteniki</p>
+  <main class="container mx-auto px-6 py-10">
+    <header class="mb-12 text-center">
+      <h1 class="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">Odkryj swoje ćwiczenia</h1>
+      <p class="font-body text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
+        Przeglądaj nagrania z yogi, mobilności i kalisteniki
+      </p>
     </header>
     <FilterBar client:load initialCategory={categoryParam} initialLevel={levelParam} />
     <VideoGrid client:load initialParams={initialParams} />

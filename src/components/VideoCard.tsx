@@ -32,7 +32,7 @@ export function VideoCard({ video, userRole }: VideoCardProps) {
 
   return (
     <Card
-      className="group cursor-pointer transition-transform hover:scale-105 focus-within:ring-2 focus-within:ring-indigo-500"
+      className="group cursor-pointer transition-all hover:scale-[1.02] focus-within:ring-2 focus-within:ring-primary/50"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -40,37 +40,37 @@ export function VideoCard({ video, userRole }: VideoCardProps) {
       aria-label={`${video.title} - ${formatDuration(video.duration)}`}
     >
       {/* Thumbnail */}
-      <div className="relative aspect-video overflow-hidden rounded-t-lg bg-slate-800">
+      <div className="relative aspect-video overflow-hidden rounded-t-2xl bg-muted">
         <img
           src={imageError ? "/placeholder-thumbnail.svg" : video.thumbnail_url}
           alt={video.title}
           onError={() => setImageError(true)}
           loading="lazy"
-          className={`w-full h-full object-cover ${!hasAccess ? "blur-md" : ""}`}
+          className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${!hasAccess ? "blur-md" : ""}`}
         />
 
         {/* Premium Badge */}
         {video.is_premium && (
-          <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-indigo-600">Premium</Badge>
+          <Badge className="absolute top-3 right-3 bg-gradient-sunset shadow-glow">Premium</Badge>
         )}
 
         {/* Duration Badge */}
-        <Badge variant="secondary" className="absolute bottom-2 right-2 bg-black/70 text-white">
+        <Badge variant="secondary" className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm">
           {formatDuration(video.duration)}
         </Badge>
 
         {/* Blur Overlay for inaccessible premium */}
         {!hasAccess && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <p className="text-white text-sm font-medium">Tylko Premium</p>
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
+            <p className="text-foreground text-sm font-medium font-heading">Tylko Premium</p>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg text-slate-100 line-clamp-2 mb-2">{video.title}</h3>
-        <div className="flex gap-2">
+      <CardContent className="p-5">
+        <h3 className="font-heading font-semibold text-lg text-foreground line-clamp-2 mb-3">{video.title}</h3>
+        <div className="flex gap-2 flex-wrap">
           <Badge variant="outline">{getCategoryLabel(video.category)}</Badge>
           <Badge variant="outline">{getLevelLabel(video.level)}</Badge>
         </div>

@@ -16,6 +16,15 @@ const { title = "10x Astro Starter" } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
+    
+    <!-- Yoga Theme Fonts - Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link 
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Quicksand:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" 
+      rel="stylesheet" 
+    />
+    
     <title>{title}</title>
   </head>
   <body>
@@ -30,5 +39,11 @@ const { title = "10x Astro Starter" } = Astro.props;
     margin: 0;
     width: 100%;
     height: 100%;
+  }
+  
+  :root {
+    --font-display: 'Cormorant Garamond', serif;
+    --font-heading: 'Quicksand', sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   }
 </style>

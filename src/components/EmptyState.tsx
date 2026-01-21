@@ -16,9 +16,9 @@ interface EmptyStateProps {
 
 export function EmptyState({ message, action }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center" role="status" aria-live="polite">
-      <div className="mb-4 text-slate-400">
-        <svg className="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <div className="flex flex-col items-center justify-center py-20 text-center" role="status" aria-live="polite">
+      <div className="mb-6 text-muted-foreground/60">
+        <svg className="w-28 h-28 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -27,9 +27,9 @@ export function EmptyState({ message, action }: EmptyStateProps) {
           />
         </svg>
       </div>
-      <h3 className="text-xl font-semibold text-slate-300 mb-2">{message}</h3>
+      <h3 className="font-heading text-2xl font-semibold text-foreground mb-2">{message}</h3>
       {action && (
-        <Button onClick={action.onClick} variant="outline" className="mt-4">
+        <Button onClick={action.onClick} variant="outline" className="mt-6">
           {action.label}
         </Button>
       )}

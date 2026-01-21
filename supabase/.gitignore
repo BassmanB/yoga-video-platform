@@ -6,3 +6,8 @@
 .env.keys
 .env.local
 .env.*.local
+
+DIAGNOSIS_REPORT.md
+ENV_SETUP.md
+
+notes.txt
