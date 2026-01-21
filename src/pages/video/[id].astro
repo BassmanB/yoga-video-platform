@@ -1,0 +1,70 @@
+---
+/**
+ * Video Player Page - /video/[id]
+ *
+ * Displays video player with full details for a specific video
+ * Handles access control for premium content
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import Navbar from "@/components/Navbar.astro";
+import { BackButton, VideoPlayerContainer } from "@/components/video-player";
+import type { UserRole } from "@/types";
+
+// Get video ID from URL params
+const { id } = Astro.params;
+
+// Validate ID exists
+if (!id) {
+  return Astro.redirect("/");
+}
+
+// Get Supabase client from locals
+const supabase = Astro.locals.supabase;
+
+// Get user session and role
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+// Determine user role
+let userRole: UserRole | null = null;
+if (session?.user) {
+  // Get role from user metadata
+  const role = session.user.user_metadata?.role;
+
+  // Validate role
+  if (role === "free" || role === "premium" || role === "admin") {
+    userRole = role as UserRole;
+  } else {
+    // Default to free if role is missing or invalid
+    userRole = "free";
+  }
+}
+
+// Page title will be updated by React component after loading
+const pageTitle = "Odtwarzacz wideo";
+---
+
+<Layout title={pageTitle}>
+  <Navbar />
+  <main class="min-h-screen bg-background">
+    <div class="container mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-10 lg:px-8">
+      <!-- Back button -->
+      <BackButton client:load />
+
+      <!-- Video player container with all states -->
+      <div class="mx-auto max-w-5xl">
+        <VideoPlayerContainer client:load videoId={id} userRole={userRole} />
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Ensure Plyr styles are loaded */
+  :global(.plyr) {
+    --plyr-color-main: #8b5cf6;
+    --plyr-video-background: #1e293b;
+  }
+</style>

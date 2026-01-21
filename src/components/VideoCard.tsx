@@ -56,7 +56,7 @@ export function VideoCard({ video, userRole }: VideoCardProps) {
 
         {/* Duration Badge */}
         <Badge variant="secondary" className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm">
-          {formatDuration(video.duration)}
+          {formatDuration(video.duration).formatted}
         </Badge>
 
         {/* Blur Overlay for inaccessible premium */}

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "plyr/dist/plyr.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -7,48 +8,48 @@
 :root {
   /* Border Radius - Soft & Welcoming */
   --radius: 1rem;
-  
+
   /* Yoga Color Palette - Light Mode */
   --background: oklch(0.985 0.005 60); /* Warm off-white */
   --foreground: oklch(0.25 0.01 50); /* Dark earth brown */
-  
+
   --card: oklch(0.99 0.003 60);
   --card-foreground: oklch(0.25 0.01 50);
-  
+
   --popover: oklch(0.99 0.003 60);
   --popover-foreground: oklch(0.25 0.01 50);
-  
+
   /* Primary - Earth Brown (Grounding) */
   --primary: oklch(0.5 0.04 50); /* #8B7355 earth-500 */
   --primary-foreground: oklch(0.985 0.005 60);
-  
+
   /* Secondary - Sage Green (Balance) */
   --secondary: oklch(0.7 0.03 160); /* #9DB5B2 sage-400 */
   --secondary-foreground: oklch(0.25 0.01 50);
-  
+
   /* Muted - Light Earth Tones */
   --muted: oklch(0.95 0.008 50);
   --muted-foreground: oklch(0.55 0.02 50);
-  
+
   /* Accent - Sunset Gold (Energy) */
   --accent: oklch(0.75 0.08 70); /* #D4A574 sunset-400 */
   --accent-foreground: oklch(0.25 0.01 50);
-  
+
   /* Destructive - Warm Red */
   --destructive: oklch(0.577 0.245 27.325);
-  
+
   /* Borders & Inputs - Subtle Earth Tones */
   --border: oklch(0.88 0.01 50);
   --input: oklch(0.88 0.01 50);
   --ring: oklch(0.5 0.04 50);
-  
+
   /* Chart Colors - Nature Inspired */
   --chart-1: oklch(0.75 0.08 70); /* Sunset gold */
   --chart-2: oklch(0.7 0.03 160); /* Sage green */
   --chart-3: oklch(0.65 0.06 280); /* Lavender */
   --chart-4: oklch(0.6 0.08 220); /* Sky blue */
   --chart-5: oklch(0.5 0.04 50); /* Earth brown */
-  
+
   /* Sidebar */
   --sidebar: oklch(0.985 0.005 60);
   --sidebar-foreground: oklch(0.25 0.01 50);
@@ -58,14 +59,14 @@
   --sidebar-accent-foreground: oklch(0.25 0.01 50);
   --sidebar-border: oklch(0.88 0.01 50);
   --sidebar-ring: oklch(0.5 0.04 50);
-  
+
   /* Custom Yoga Theme Variables */
   --yoga-earth: oklch(0.5 0.04 50);
   --yoga-sage: oklch(0.7 0.03 160);
   --yoga-sunset: oklch(0.75 0.08 70);
   --yoga-lavender: oklch(0.65 0.06 280);
   --yoga-sky: oklch(0.6 0.08 220);
-  
+
   /* Transitions */
   --transition-breath: 300ms ease-out;
   --transition-flow: 500ms ease-in-out;
@@ -76,44 +77,44 @@
 .dark {
   --background: oklch(0.18 0.01 50); /* Dark earth brown */
   --foreground: oklch(0.95 0.008 50); /* Warm off-white */
-  
+
   --card: oklch(0.22 0.012 50);
   --card-foreground: oklch(0.95 0.008 50);
-  
+
   --popover: oklch(0.22 0.012 50);
   --popover-foreground: oklch(0.95 0.008 50);
-  
+
   /* Primary - Lighter Earth for dark mode */
   --primary: oklch(0.65 0.05 50); /* Lighter earth */
   --primary-foreground: oklch(0.18 0.01 50);
-  
+
   /* Secondary - Sage remains balanced */
   --secondary: oklch(0.55 0.04 160); /* Deeper sage */
   --secondary-foreground: oklch(0.95 0.008 50);
-  
+
   /* Muted */
   --muted: oklch(0.28 0.015 50);
   --muted-foreground: oklch(0.7 0.02 50);
-  
+
   /* Accent - Sunset maintains warmth */
   --accent: oklch(0.7 0.09 70); /* Brighter sunset for dark mode */
   --accent-foreground: oklch(0.18 0.01 50);
-  
+
   /* Destructive */
   --destructive: oklch(0.704 0.191 22.216);
-  
+
   /* Borders & Inputs */
   --border: oklch(0.35 0.02 50);
   --input: oklch(0.35 0.02 50);
   --ring: oklch(0.65 0.05 50);
-  
+
   /* Chart Colors - Adjusted for dark mode */
   --chart-1: oklch(0.7 0.09 70);
   --chart-2: oklch(0.6 0.05 160);
   --chart-3: oklch(0.65 0.08 280);
   --chart-4: oklch(0.65 0.1 220);
   --chart-5: oklch(0.65 0.05 50);
-  
+
   /* Sidebar */
   --sidebar: oklch(0.22 0.012 50);
   --sidebar-foreground: oklch(0.95 0.008 50);
@@ -123,7 +124,7 @@
   --sidebar-accent-foreground: oklch(0.95 0.008 50);
   --sidebar-border: oklch(0.35 0.02 50);
   --sidebar-ring: oklch(0.65 0.05 50);
-  
+
   /* Custom Yoga Theme Variables - Dark Mode */
   --yoga-earth: oklch(0.65 0.05 50);
   --yoga-sage: oklch(0.6 0.05 160);
@@ -174,32 +175,37 @@
   * {
     @apply border-border outline-ring/50;
   }
-  
+
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-body, 'Inter', system-ui, -apple-system, sans-serif);
+    font-family: var(--font-body, "Inter", system-ui, -apple-system, sans-serif);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   /* Typography Hierarchy */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading, 'Quicksand', sans-serif);
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading, "Quicksand", sans-serif);
     font-weight: 600;
     line-height: 1.2;
   }
-  
+
   .font-display {
-    font-family: var(--font-display, 'Cormorant Garamond', serif);
+    font-family: var(--font-display, "Cormorant Garamond", serif);
   }
-  
+
   /* Smooth transitions for theme changes */
   * {
     transition-property: background-color, border-color, color;
     transition-duration: var(--transition-gentle);
     transition-timing-function: ease-out;
   }
-  
+
   /* Focus visible improvements */
   *:focus-visible {
     outline: 2px solid var(--ring);
@@ -217,27 +223,28 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   /* Yoga-specific utilities */
   .shadow-soft {
     box-shadow: 0 4px 20px rgba(43, 31, 24, 0.06);
   }
-  
+
   .shadow-card {
     box-shadow: 0 8px 30px rgba(43, 31, 24, 0.08);
   }
-  
+
   .shadow-float {
     box-shadow: 0 12px 40px rgba(43, 31, 24, 0.1);
   }
-  
+
   .shadow-glow {
     box-shadow: 0 0 20px rgba(212, 165, 116, 0.2);
   }
-  
+
   /* Breathing animation for meditative elements */
   @keyframes breathe {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
       transform: scale(1);
     }
@@ -246,34 +253,66 @@
       transform: scale(1.02);
     }
   }
-  
+
   .animate-breathe {
     animation: breathe 4s ease-in-out infinite;
   }
-  
+
   /* Gradient backgrounds */
   .bg-gradient-yoga {
     background: linear-gradient(135deg, var(--yoga-earth) 0%, var(--yoga-sage) 100%);
   }
-  
+
   .bg-gradient-sunset {
     background: linear-gradient(135deg, var(--yoga-sunset) 0%, var(--yoga-lavender) 100%);
   }
-  
+
   .bg-gradient-calm {
     background: linear-gradient(135deg, var(--yoga-sage) 0%, var(--yoga-sky) 100%);
   }
-  
+
   /* Spacing utilities */
   .space-breathe {
     gap: 1.5rem;
   }
-  
+
   .space-flow {
     gap: 2rem;
   }
-  
+
   .space-ground {
     gap: 3rem;
+  }
+}
+
+/* Plyr Video Player Customization */
+@layer components {
+  /* Plyr main color (purple accent for controls) */
+  .plyr {
+    --plyr-color-main: #8b5cf6;
+    --plyr-video-background: #1e293b;
+    --plyr-menu-background: #0f172a;
+    --plyr-menu-color: #e2e8f0;
+    --plyr-video-control-color: #f8fafc;
+    --plyr-video-control-background-hover: rgba(139, 92, 246, 0.1);
+    --plyr-badge-background: #8b5cf6;
+    --plyr-badge-text-color: #fff;
+  }
+
+  /* Dark mode adjustments */
+  .dark .plyr {
+    --plyr-video-background: #0f172a;
+    --plyr-menu-background: #020617;
+  }
+
+  /* Plyr container rounded corners */
+  .plyr__video-wrapper {
+    @apply rounded-lg overflow-hidden;
+  }
+
+  /* Custom loading spinner */
+  .plyr--loading::after {
+    border-color: rgba(139, 92, 246, 0.2);
+    border-top-color: #8b5cf6;
   }
 }
