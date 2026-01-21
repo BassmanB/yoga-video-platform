@@ -1,4 +1,5 @@
 # Database Schema Plan
+
 ## Yoga Video Platform MVP
 
 **Version:** 1.0  
@@ -31,22 +32,22 @@ Primary table storing video metadata and access control information.
 CREATE TABLE videos (
   -- Identity
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  
+
   -- Content Metadata
   title TEXT NOT NULL,
   description TEXT,
   category TEXT NOT NULL CHECK (category IN ('yoga', 'mobility', 'calisthenics')),
   level TEXT NOT NULL CHECK (level IN ('beginner', 'intermediate', 'advanced')),
   duration INTEGER NOT NULL CHECK (duration > 0 AND duration <= 7200),
-  
+
   -- File References (relative paths in Supabase Storage)
   video_url TEXT NOT NULL,
   thumbnail_url TEXT NOT NULL,
-  
+
   -- Access Control
   is_premium BOOLEAN DEFAULT false NOT NULL,
   status TEXT DEFAULT 'draft' NOT NULL CHECK (status IN ('draft', 'published', 'archived')),
-  
+
   -- Audit Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
@@ -55,20 +56,20 @@ CREATE TABLE videos (
 
 #### Column Descriptions
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Primary key, auto-generated |
-| `title` | TEXT | Video title (required) |
-| `description` | TEXT | Full video description (optional) |
-| `category` | TEXT | Content category: yoga, mobility, or calisthenics |
-| `level` | TEXT | Difficulty: beginner, intermediate, or advanced |
-| `duration` | INTEGER | Video length in seconds (1-7200 = max 2 hours) |
-| `video_url` | TEXT | Relative path in Supabase Storage (e.g., `videos-free/yoga-flow.mp4`) |
-| `thumbnail_url` | TEXT | Relative path in Supabase Storage (e.g., `thumbnails/yoga-flow.jpg`) |
-| `is_premium` | BOOLEAN | True if content requires premium access |
-| `status` | TEXT | Publication status: draft, published, or archived |
-| `created_at` | TIMESTAMPTZ | Record creation timestamp |
-| `updated_at` | TIMESTAMPTZ | Last modification timestamp (auto-updated) |
+| Column          | Type        | Description                                                           |
+| --------------- | ----------- | --------------------------------------------------------------------- |
+| `id`            | UUID        | Primary key, auto-generated                                           |
+| `title`         | TEXT        | Video title (required)                                                |
+| `description`   | TEXT        | Full video description (optional)                                     |
+| `category`      | TEXT        | Content category: yoga, mobility, or calisthenics                     |
+| `level`         | TEXT        | Difficulty: beginner, intermediate, or advanced                       |
+| `duration`      | INTEGER     | Video length in seconds (1-7200 = max 2 hours)                        |
+| `video_url`     | TEXT        | Relative path in Supabase Storage (e.g., `videos-free/yoga-flow.mp4`) |
+| `thumbnail_url` | TEXT        | Relative path in Supabase Storage (e.g., `thumbnails/yoga-flow.jpg`)  |
+| `is_premium`    | BOOLEAN     | True if content requires premium access                               |
+| `status`        | TEXT        | Publication status: draft, published, or archived                     |
+| `created_at`    | TIMESTAMPTZ | Record creation timestamp                                             |
+| `updated_at`    | TIMESTAMPTZ | Last modification timestamp (auto-updated)                            |
 
 #### Design Notes
 
@@ -96,11 +97,11 @@ All user data managed through Supabase Auth with metadata:
 
 #### User Roles
 
-| Role | Description | Permissions |
-|------|-------------|-------------|
-| `free` | Default for new users | Access to free videos only (`is_premium = false`) |
-| `premium` | Paid tier users | Access to all published videos |
-| `admin` | Platform administrators | Full CRUD on videos, view all statuses, manage storage |
+| Role      | Description             | Permissions                                            |
+| --------- | ----------------------- | ------------------------------------------------------ |
+| `free`    | Default for new users   | Access to free videos only (`is_premium = false`)      |
+| `premium` | Paid tier users         | Access to all published videos                         |
+| `admin`   | Platform administrators | Full CRUD on videos, view all statuses, manage storage |
 
 #### Role Assignment
 
@@ -124,15 +125,16 @@ Strategic indexes for expected query patterns.
 ### 4.2 Composite Index: Category + Premium + Status
 
 ```sql
-CREATE INDEX idx_videos_category_premium_status 
+CREATE INDEX idx_videos_category_premium_status
 ON videos(category, is_premium, status);
 ```
 
 **Purpose:** Optimize main user-facing query:
+
 ```sql
-SELECT * FROM videos 
-WHERE category = 'yoga' 
-  AND (is_premium = false OR <user_has_premium>) 
+SELECT * FROM videos
+WHERE category = 'yoga'
+  AND (is_premium = false OR <user_has_premium>)
   AND status = 'published'
 ORDER BY created_at DESC;
 ```
@@ -140,7 +142,7 @@ ORDER BY created_at DESC;
 ### 4.3 Single Index: Status
 
 ```sql
-CREATE INDEX idx_videos_status 
+CREATE INDEX idx_videos_status
 ON videos(status);
 ```
 
@@ -148,11 +150,11 @@ ON videos(status);
 
 ### 4.4 Index Strategy Summary
 
-| Index | Columns | Use Case | Priority |
-|-------|---------|----------|----------|
-| Primary | `id` | Direct video lookup | Critical |
-| Composite | `category, is_premium, status` | Filtered video grid | High |
-| Single | `status` | Admin content management | Medium |
+| Index     | Columns                        | Use Case                 | Priority |
+| --------- | ------------------------------ | ------------------------ | -------- |
+| Primary   | `id`                           | Direct video lookup      | Critical |
+| Composite | `category, is_premium, status` | Filtered video grid      | High     |
+| Single    | `status`                       | Admin content management | Medium   |
 
 **Not Indexed:** `created_at` - Small dataset (~100 videos expected), sequential scan acceptable.
 
@@ -175,9 +177,9 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 -- Trigger
-CREATE TRIGGER update_videos_updated_at 
+CREATE TRIGGER update_videos_updated_at
 BEFORE UPDATE ON videos
-FOR EACH ROW 
+FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 ```
 
@@ -199,7 +201,7 @@ ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public videos are viewable by everyone"
 ON videos FOR SELECT
 USING (
-  is_premium = false 
+  is_premium = false
   AND status = 'published'
 );
 ```
@@ -214,9 +216,9 @@ USING (
 CREATE POLICY "Premium videos for authenticated premium/admin users"
 ON videos FOR SELECT
 USING (
-  is_premium = true 
+  is_premium = true
   AND status = 'published'
-  AND auth.uid() IS NOT NULL 
+  AND auth.uid() IS NOT NULL
   AND (
     COALESCE((auth.jwt() -> 'user_metadata' ->> 'role'), 'free') = 'premium'
     OR COALESCE((auth.jwt() -> 'user_metadata' ->> 'role'), 'free') = 'admin'
@@ -235,7 +237,7 @@ USING (
 CREATE POLICY "Admins can view all videos"
 ON videos FOR SELECT
 USING (
-  auth.uid() IS NOT NULL 
+  auth.uid() IS NOT NULL
   AND (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 ```
@@ -250,7 +252,7 @@ USING (
 CREATE POLICY "Only admins can insert videos"
 ON videos FOR INSERT
 WITH CHECK (
-  auth.uid() IS NOT NULL 
+  auth.uid() IS NOT NULL
   AND (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 ```
@@ -265,7 +267,7 @@ WITH CHECK (
 CREATE POLICY "Only admins can update videos"
 ON videos FOR UPDATE
 USING (
-  auth.uid() IS NOT NULL 
+  auth.uid() IS NOT NULL
   AND (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 ```
@@ -280,7 +282,7 @@ USING (
 CREATE POLICY "Only admins can delete videos"
 ON videos FOR DELETE
 USING (
-  auth.uid() IS NOT NULL 
+  auth.uid() IS NOT NULL
   AND (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 ```
@@ -291,14 +293,14 @@ USING (
 
 ### 6.6 RLS Policy Summary
 
-| Operation | Anonymous | Free User | Premium User | Admin |
-|-----------|-----------|-----------|--------------|-------|
-| SELECT free videos | ✅ | ✅ | ✅ | ✅ |
-| SELECT premium videos | ❌ | ❌ | ✅ | ✅ |
-| SELECT draft/archived | ❌ | ❌ | ❌ | ✅ |
-| INSERT | ❌ | ❌ | ❌ | ✅ |
-| UPDATE | ❌ | ❌ | ❌ | ✅ |
-| DELETE | ❌ | ❌ | ❌ | ✅ |
+| Operation             | Anonymous | Free User | Premium User | Admin |
+| --------------------- | --------- | --------- | ------------ | ----- |
+| SELECT free videos    | ✅        | ✅        | ✅           | ✅    |
+| SELECT premium videos | ❌        | ❌        | ✅           | ✅    |
+| SELECT draft/archived | ❌        | ❌        | ❌           | ✅    |
+| INSERT                | ❌        | ❌        | ❌           | ✅    |
+| UPDATE                | ❌        | ❌        | ❌           | ✅    |
+| DELETE                | ❌        | ❌        | ❌           | ✅    |
 
 ---
 
@@ -327,8 +329,8 @@ thumbnails/           # Public thumbnail images
 
 ```sql
 -- Create Buckets
-INSERT INTO storage.buckets (id, name, public) 
-VALUES 
+INSERT INTO storage.buckets (id, name, public)
+VALUES
   ('videos-free', 'videos-free', true),
   ('videos-premium', 'videos-premium', false),
   ('thumbnails', 'thumbnails', true);
@@ -447,11 +449,11 @@ USING (
 
 ### 7.4 Storage Security Summary
 
-| Bucket | Public Read | Authenticated Read | Admin Write |
-|--------|-------------|-------------------|-------------|
-| `videos-free` | ✅ | ✅ | ✅ |
-| `videos-premium` | ❌ | Premium/Admin only | ✅ |
-| `thumbnails` | ✅ | ✅ | ✅ |
+| Bucket           | Public Read | Authenticated Read | Admin Write |
+| ---------------- | ----------- | ------------------ | ----------- |
+| `videos-free`    | ✅          | ✅                 | ✅          |
+| `videos-premium` | ❌          | Premium/Admin only | ✅          |
+| `thumbnails`     | ✅          | ✅                 | ✅          |
 
 ---
 
@@ -468,6 +470,7 @@ The `videos` table is self-contained with no foreign key relationships.
 Potential expansions when scaling beyond MVP:
 
 #### User Profiles
+
 ```sql
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id),
@@ -476,9 +479,11 @@ CREATE TABLE user_profiles (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
+
 **Relationship:** `user_profiles.id → auth.users(id)` (1:1)
 
 #### Video Views (Analytics)
+
 ```sql
 CREATE TABLE video_views (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -488,11 +493,14 @@ CREATE TABLE video_views (
   watch_duration INTEGER -- seconds watched
 );
 ```
-**Relationships:** 
+
+**Relationships:**
+
 - `video_views.video_id → videos(id)` (N:1)
 - `video_views.user_id → auth.users(id)` (N:1)
 
 #### Playlists
+
 ```sql
 CREATE TABLE playlists (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -508,7 +516,9 @@ CREATE TABLE playlist_videos (
   PRIMARY KEY (playlist_id, video_id)
 );
 ```
-**Relationships:** 
+
+**Relationships:**
+
 - `playlists.created_by → auth.users(id)` (N:1)
 - `playlist_videos` (M:N junction table)
 
@@ -520,16 +530,16 @@ Seed data for testing and development.
 
 ```sql
 INSERT INTO videos (
-  title, 
-  description, 
-  category, 
-  level, 
-  duration, 
-  video_url, 
-  thumbnail_url, 
+  title,
+  description,
+  category,
+  level,
+  duration,
+  video_url,
+  thumbnail_url,
   is_premium,
   status
-) VALUES 
+) VALUES
 -- Free Content
 (
   'Poranna Yoga Flow - 15 min',
@@ -600,23 +610,23 @@ Documentation embedded in the database schema.
 
 ```sql
 -- Table Comments
-COMMENT ON TABLE videos IS 
+COMMENT ON TABLE videos IS
   'Tabela przechowująca metadane nagrań wideo z ćwiczeniami fizycznymi';
 
 -- Column Comments
-COMMENT ON COLUMN videos.duration IS 
+COMMENT ON COLUMN videos.duration IS
   'Czas trwania nagrania w sekundach (maksymalnie 7200 = 2 godziny)';
 
-COMMENT ON COLUMN videos.video_url IS 
+COMMENT ON COLUMN videos.video_url IS
   'Relatywna ścieżka do pliku wideo w Supabase Storage (np. videos-free/yoga-flow.mp4)';
 
-COMMENT ON COLUMN videos.thumbnail_url IS 
+COMMENT ON COLUMN videos.thumbnail_url IS
   'Relatywna ścieżka do miniaturki w Supabase Storage (np. thumbnails/yoga-flow.jpg)';
 
-COMMENT ON COLUMN videos.status IS 
+COMMENT ON COLUMN videos.status IS
   'Status publikacji: draft (roboczy), published (opublikowany), archived (zarchiwizowany)';
 
-COMMENT ON COLUMN videos.is_premium IS 
+COMMENT ON COLUMN videos.is_premium IS
   'Określa czy treść wymaga dostępu premium (true = płatne, false = darmowe)';
 ```
 
@@ -629,39 +639,45 @@ COMMENT ON COLUMN videos.is_premium IS
 **Expected Query Patterns:**
 
 1. **Homepage Grid (Most Frequent)**
+
    ```sql
    -- Anonymous User
-   SELECT * FROM videos 
-   WHERE is_premium = false 
+   SELECT * FROM videos
+   WHERE is_premium = false
      AND status = 'published'
    ORDER BY created_at DESC;
-   
+
    -- Premium User
-   SELECT * FROM videos 
+   SELECT * FROM videos
    WHERE status = 'published'
      AND (is_premium = false OR is_premium = true)
    ORDER BY created_at DESC;
    ```
+
    **Optimization:** Composite index `idx_videos_category_premium_status`
 
 2. **Category Filtering**
+
    ```sql
-   SELECT * FROM videos 
-   WHERE category = 'yoga' 
+   SELECT * FROM videos
+   WHERE category = 'yoga'
      AND status = 'published'
      AND (is_premium = false OR <user_premium>);
    ```
+
    **Optimization:** Same composite index covers this query
 
 3. **Video Detail Page**
+
    ```sql
    SELECT * FROM videos WHERE id = '<uuid>';
    ```
+
    **Optimization:** Primary key index (automatic)
 
 4. **Admin Dashboard**
    ```sql
-   SELECT * FROM videos 
+   SELECT * FROM videos
    WHERE status = 'draft'
    ORDER BY created_at DESC;
    ```
@@ -679,6 +695,7 @@ COMMENT ON COLUMN videos.is_premium IS
 ### 11.3 Scaling Considerations
 
 When to optimize further:
+
 - **1000+ videos:** Consider partitioning by `created_at` (monthly/yearly)
 - **10,000+ users:** Add caching layer (Redis) for video metadata
 - **100+ videos/day:** Implement full-text search (PostgreSQL `tsvector`)
@@ -751,6 +768,7 @@ When to optimize further:
 ## 15. Implementation Checklist
 
 ### Phase 1: Core Schema
+
 - [ ] Create `videos` table with all columns and constraints
 - [ ] Create indexes (composite + single)
 - [ ] Create `update_updated_at_column()` function
@@ -758,6 +776,7 @@ When to optimize further:
 - [ ] Add table and column comments
 
 ### Phase 2: Security
+
 - [ ] Enable RLS on `videos` table
 - [ ] Create SELECT policies (public, premium, admin)
 - [ ] Create INSERT policy (admin only)
@@ -765,6 +784,7 @@ When to optimize further:
 - [ ] Create DELETE policy (admin only)
 
 ### Phase 3: Storage
+
 - [ ] Create `videos-free` bucket (public)
 - [ ] Create `videos-premium` bucket (private)
 - [ ] Create `thumbnails` bucket (public)
@@ -772,6 +792,7 @@ When to optimize further:
 - [ ] Test upload/download with different roles
 
 ### Phase 4: Testing
+
 - [ ] Test anonymous user access (free videos only)
 - [ ] Test free user access (free videos only)
 - [ ] Test premium user access (all published videos)
@@ -781,6 +802,7 @@ When to optimize further:
 - [ ] Load test with seed data
 
 ### Phase 5: Documentation
+
 - [ ] Document admin upload workflow
 - [ ] Document role assignment process
 - [ ] Create troubleshooting guide
@@ -800,10 +822,10 @@ Recommended types for frontend integration:
 
 ```typescript
 // Database types
-export type VideoCategory = 'yoga' | 'mobility' | 'calisthenics';
-export type VideoLevel = 'beginner' | 'intermediate' | 'advanced';
-export type VideoStatus = 'draft' | 'published' | 'archived';
-export type UserRole = 'free' | 'premium' | 'admin';
+export type VideoCategory = "yoga" | "mobility" | "calisthenics";
+export type VideoLevel = "beginner" | "intermediate" | "advanced";
+export type VideoStatus = "draft" | "published" | "archived";
+export type UserRole = "free" | "premium" | "admin";
 
 export interface Video {
   id: string; // UUID
@@ -830,28 +852,28 @@ export interface UserMetadata {
 
 ```sql
 -- Get all published free videos
-SELECT * FROM videos 
+SELECT * FROM videos
 WHERE is_premium = false AND status = 'published'
 ORDER BY created_at DESC;
 
 -- Get published yoga videos (respects RLS)
-SELECT * FROM videos 
+SELECT * FROM videos
 WHERE category = 'yoga' AND status = 'published'
 ORDER BY created_at DESC;
 
 -- Admin: Get all draft videos
-SELECT * FROM videos 
+SELECT * FROM videos
 WHERE status = 'draft'
 ORDER BY created_at DESC;
 
 -- Admin: Publish a video
-UPDATE videos 
-SET status = 'published' 
+UPDATE videos
+SET status = 'published'
 WHERE id = '<uuid>';
 
 -- Admin: Archive a video
-UPDATE videos 
-SET status = 'archived' 
+UPDATE videos
+SET status = 'archived'
 WHERE id = '<uuid>';
 ```
 

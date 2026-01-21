@@ -1,8 +1,45 @@
 ---
-import Welcome from "../components/Welcome.astro";
+/**
+ * Home page - Main entry point
+ *
+ * Displays all available videos with filtering capabilities
+ */
+
 import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import { FilterBar } from "../components/FilterBar";
+import { VideoGrid } from "../components/VideoGrid";
+import type { VideoListQueryParams, VideoCategory, VideoLevel } from "../types";
+import { isVideoCategory, isVideoLevel } from "../types";
+
+// Parse query params
+const url = new URL(Astro.request.url);
+const categoryParam = url.searchParams.get("category");
+const levelParam = url.searchParams.get("level");
+
+// Validate and set initial params
+const category = categoryParam && isVideoCategory(categoryParam) ? (categoryParam as VideoCategory) : undefined;
+
+const level = levelParam && isVideoLevel(levelParam) ? (levelParam as VideoLevel) : undefined;
+
+const initialParams: VideoListQueryParams = {
+  category,
+  level,
+  limit: 50,
+  offset: 0,
+  sort: "created_at",
+  order: "desc",
+};
 ---
 
-<Layout>
-  <Welcome />
+<Layout title="Yoga & Fitness - Strona Główna">
+  <Navbar />
+  <main class="container mx-auto px-4 py-8">
+    <header class="mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-slate-100 mb-2">Odkryj swoje ćwiczenia</h1>
+      <p class="text-slate-400 text-lg">Przeglądaj nagrania z yogi, mobilności i kalisteniki</p>
+    </header>
+    <FilterBar client:load initialCategory={categoryParam} initialLevel={levelParam} />
+    <VideoGrid client:load initialParams={initialParams} />
+  </main>
 </Layout>

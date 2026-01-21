@@ -1,13 +1,15 @@
-# 10x Astro Starter
+# Yoga & Fitness Video Platform
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+A modern video platform for yoga, mobility, and calisthenics content with premium access control.
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
+- [Astro](https://astro.build/) v5 - Modern web framework with SSR
+- [React](https://react.dev/) v19 - UI library for interactive components
 - [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+- [Tailwind CSS](https://tailwindcss.com/) v4 - Utility-first CSS framework
+- [Shadcn/ui](https://ui.shadcn.com/) - Beautiful, accessible UI components
+- [Supabase](https://supabase.com/) - Backend with PostgreSQL, Auth & Storage
 
 ## Prerequisites
 
@@ -19,8 +21,8 @@ A modern, opinionated starter template for building fast, accessible, and AI-fri
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
+git clone <repository-url>
+cd yoga-video-platform
 ```
 
 2. Install dependencies:
@@ -29,13 +31,37 @@ cd 10x-astro-starter
 npm install
 ```
 
-3. Run the development server:
+3. Set up environment variables:
+
+Create a `.env` file in the root directory:
+
+```bash
+# Supabase Configuration
+PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+```
+
+📖 **See [ENV_SETUP.md](./ENV_SETUP.md) for detailed instructions on getting these values.**
+
+Get these values from your Supabase project settings at https://app.supabase.com
+
+4. Set up the database:
+
+```bash
+# Run migrations (if using Supabase CLI)
+npx supabase db push
+```
+
+5. Run the development server:
 
 ```bash
 npm run dev
 ```
 
-4. Build for production:
+The app will be available at http://localhost:3000
+
+6. Build for production:
 
 ```bash
 npm run build
@@ -51,16 +77,39 @@ npm run build
 
 ## Project Structure
 
-```md
+```
 .
 ├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
+│   ├── layouts/           # Astro layouts
+│   ├── pages/             # Astro pages
+│   │   └── api/           # API endpoints
+│   ├── components/        # UI components (Astro & React)
+│   │   └── ui/            # Shadcn/ui components
+│   ├── lib/
+│   │   ├── hooks/         # React custom hooks
+│   │   ├── services/      # Business logic services
+│   │   ├── utils/         # Utility functions
+│   │   ├── validators/    # Zod schemas
+│   │   └── types/         # View model types
+│   ├── db/                # Supabase client & types
+│   ├── middleware/        # Astro middleware
+│   ├── styles/            # Global styles
+│   └── types.ts           # Shared types (DTOs)
+├── public/                # Public assets
+└── supabase/
+    ├── migrations/        # Database migrations
+    └── config.toml        # Supabase config
 ```
+
+## Features
+
+- 🎥 **Video Management**: Browse and filter yoga, mobility, and calisthenics videos
+- 🔐 **Authentication**: Magic link authentication via Supabase
+- 💎 **Premium Content**: Role-based access control (Free, Premium, Admin)
+- 🎨 **Modern UI**: Beautiful, responsive design with Shadcn/ui components
+- ⚡ **Performance**: SSR with Astro, client-side hydration for interactivity
+- ♿ **Accessible**: WCAG compliant with keyboard navigation
+- 📱 **Responsive**: Mobile-first design that works on all devices
 
 ## AI Development Support
 

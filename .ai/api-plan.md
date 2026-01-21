@@ -1,4 +1,5 @@
 # REST API Plan
+
 ## Yoga Video Platform MVP
 
 **Version:** 1.0  
@@ -24,11 +25,11 @@ This document defines the REST API for the Yoga Video Platform MVP. The API is b
 
 ## 2. Resources
 
-| Resource | Database Table | Description |
-|----------|---------------|-------------|
-| Videos | `videos` | Video metadata and access control |
-| Auth | Supabase Auth | User authentication and session management |
-| Storage | Supabase Storage | Video files and thumbnails |
+| Resource | Database Table   | Description                                |
+| -------- | ---------------- | ------------------------------------------ |
+| Videos   | `videos`         | Video metadata and access control          |
+| Auth     | Supabase Auth    | User authentication and session management |
+| Storage  | Supabase Storage | Video files and thumbnails                 |
 
 **Note:** User management is handled entirely by Supabase Auth with user metadata. No custom users table exists in MVP.
 
@@ -58,17 +59,19 @@ Authentication is handled client-side using `@supabase/supabase-js`:
 ```typescript
 // Login
 const { data, error } = await supabase.auth.signInWithOtp({
-  email: 'user@example.com',
+  email: "user@example.com",
   options: {
-    emailRedirectTo: 'https://[domain]'
-  }
-})
+    emailRedirectTo: "https://[domain]",
+  },
+});
 
 // Logout
-await supabase.auth.signOut()
+await supabase.auth.signOut();
 
 // Get session
-const { data: { session } } = await supabase.auth.getSession()
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 ```
 
 ### 4.3 Authorization Headers
@@ -92,11 +95,11 @@ Roles are stored in Supabase Auth user metadata:
 }
 ```
 
-| Role | Permissions |
-|------|-------------|
-| `free` | Read published free videos |
+| Role      | Permissions                                |
+| --------- | ------------------------------------------ |
+| `free`    | Read published free videos                 |
 | `premium` | Read all published videos (free + premium) |
-| `admin` | Full CRUD on videos, read all statuses |
+| `admin`   | Full CRUD on videos, read all statuses     |
 
 **Default:** Users without a role are treated as `free` (via COALESCE in RLS policies).
 
@@ -116,16 +119,16 @@ Roles are stored in Supabase Auth user metadata:
 
 **Query Parameters:**
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `category` | string | No | - | Filter by category: `yoga`, `mobility`, `calisthenics` |
-| `level` | string | No | - | Filter by difficulty: `beginner`, `intermediate`, `advanced` |
-| `is_premium` | boolean | No | - | Filter by premium status: `true`, `false` |
-| `status` | string | No | `published` | Filter by status (admin only): `draft`, `published`, `archived` |
-| `limit` | integer | No | 50 | Number of results per page (max 100) |
-| `offset` | integer | No | 0 | Pagination offset |
-| `sort` | string | No | `created_at` | Sort field: `created_at`, `title`, `duration` |
-| `order` | string | No | `desc` | Sort order: `asc`, `desc` |
+| Parameter    | Type    | Required | Default      | Description                                                     |
+| ------------ | ------- | -------- | ------------ | --------------------------------------------------------------- |
+| `category`   | string  | No       | -            | Filter by category: `yoga`, `mobility`, `calisthenics`          |
+| `level`      | string  | No       | -            | Filter by difficulty: `beginner`, `intermediate`, `advanced`    |
+| `is_premium` | boolean | No       | -            | Filter by premium status: `true`, `false`                       |
+| `status`     | string  | No       | `published`  | Filter by status (admin only): `draft`, `published`, `archived` |
+| `limit`      | integer | No       | 50           | Number of results per page (max 100)                            |
+| `offset`     | integer | No       | 0            | Pagination offset                                               |
+| `sort`       | string  | No       | `created_at` | Sort field: `created_at`, `title`, `duration`                   |
+| `order`      | string  | No       | `desc`       | Sort order: `asc`, `desc`                                       |
 
 **Request Example:**
 
@@ -205,6 +208,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Business Logic:**
+
 - RLS policies automatically filter results based on user role
 - Anonymous users: only `is_premium = false AND status = 'published'`
 - Free users: only `is_premium = false AND status = 'published'`
@@ -213,6 +217,7 @@ Authorization: Bearer <access_token>
 - Default sort: `created_at DESC` (newest first)
 
 **Performance:**
+
 - Uses composite index: `idx_videos_category_premium_status`
 - Expected response time: < 100ms for typical queries
 
@@ -228,9 +233,9 @@ Authorization: Bearer <access_token>
 
 **URL Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | UUID | Yes | Video unique identifier |
+| Parameter | Type | Required | Description             |
+| --------- | ---- | -------- | ----------------------- |
+| `id`      | UUID | Yes      | Video unique identifier |
 
 **Request Example:**
 
@@ -291,6 +296,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Business Logic:**
+
 - RLS policies determine if user can access the video
 - Premium content requires authenticated user with `premium` or `admin` role
 - Draft/archived videos only visible to admins
@@ -300,12 +306,10 @@ Authorization: Bearer <access_token>
 
 ```typescript
 const videoUrl = supabase.storage
-  .from('videos-free') // or 'videos-premium'
-  .getPublicUrl(video.video_url).data.publicUrl
+  .from("videos-free") // or 'videos-premium'
+  .getPublicUrl(video.video_url).data.publicUrl;
 
-const thumbnailUrl = supabase.storage
-  .from('thumbnails')
-  .getPublicUrl(video.thumbnail_url).data.publicUrl
+const thumbnailUrl = supabase.storage.from("thumbnails").getPublicUrl(video.thumbnail_url).data.publicUrl;
 ```
 
 ---
@@ -343,17 +347,17 @@ Authorization: Bearer <access_token>
 
 **Request Body Schema:**
 
-| Field | Type | Required | Constraints | Description |
-|-------|------|----------|-------------|-------------|
-| `title` | string | Yes | 1-255 chars | Video title |
-| `description` | string | No | Max 5000 chars | Full description |
-| `category` | string | Yes | Enum: `yoga`, `mobility`, `calisthenics` | Content category |
-| `level` | string | Yes | Enum: `beginner`, `intermediate`, `advanced` | Difficulty level |
-| `duration` | integer | Yes | 1-7200 | Duration in seconds (max 2 hours) |
-| `video_url` | string | Yes | Valid path | Relative path in Supabase Storage |
-| `thumbnail_url` | string | Yes | Valid path | Relative path in Supabase Storage |
-| `is_premium` | boolean | No | Default: `false` | Premium content flag |
-| `status` | string | No | Enum: `draft`, `published`, `archived`. Default: `draft` | Publication status |
+| Field           | Type    | Required | Constraints                                              | Description                       |
+| --------------- | ------- | -------- | -------------------------------------------------------- | --------------------------------- |
+| `title`         | string  | Yes      | 1-255 chars                                              | Video title                       |
+| `description`   | string  | No       | Max 5000 chars                                           | Full description                  |
+| `category`      | string  | Yes      | Enum: `yoga`, `mobility`, `calisthenics`                 | Content category                  |
+| `level`         | string  | Yes      | Enum: `beginner`, `intermediate`, `advanced`             | Difficulty level                  |
+| `duration`      | integer | Yes      | 1-7200                                                   | Duration in seconds (max 2 hours) |
+| `video_url`     | string  | Yes      | Valid path                                               | Relative path in Supabase Storage |
+| `thumbnail_url` | string  | Yes      | Valid path                                               | Relative path in Supabase Storage |
+| `is_premium`    | boolean | No       | Default: `false`                                         | Premium content flag              |
+| `status`        | string  | No       | Enum: `draft`, `published`, `archived`. Default: `draft` | Publication status                |
 
 **Response Success (201 Created):**
 
@@ -432,6 +436,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Business Logic:**
+
 - RLS policy enforces admin-only access
 - All validations from database schema are enforced
 - `created_at` and `updated_at` auto-generated
@@ -439,6 +444,7 @@ Authorization: Bearer <access_token>
 - Video and thumbnail files must be uploaded to Supabase Storage before creating record
 
 **Validation Rules:**
+
 1. `title`: Required, non-empty string
 2. `category`: Must be exactly one of: `yoga`, `mobility`, `calisthenics`
 3. `level`: Must be exactly one of: `beginner`, `intermediate`, `advanced`
@@ -459,9 +465,9 @@ Authorization: Bearer <access_token>
 
 **URL Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | UUID | Yes | Video unique identifier |
+| Parameter | Type | Required | Description             |
+| --------- | ---- | -------- | ----------------------- |
+| `id`      | UUID | Yes      | Video unique identifier |
 
 **Request Headers:**
 
@@ -512,6 +518,7 @@ Authorization: Bearer <access_token>
 **Response Errors:** Same as Create Video (400, 403, 404)
 
 **Business Logic:**
+
 - RLS policy enforces admin-only access
 - `updated_at` automatically updated via database trigger
 - All validations applied
@@ -529,9 +536,9 @@ Authorization: Bearer <access_token>
 
 **URL Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | UUID | Yes | Video unique identifier |
+| Parameter | Type | Required | Description             |
+| --------- | ---- | -------- | ----------------------- |
+| `id`      | UUID | Yes      | Video unique identifier |
 
 **Request Headers:**
 
@@ -575,12 +582,14 @@ Authorization: Bearer <access_token>
 **Response Errors:** Same as Create Video (400, 403, 404)
 
 **Business Logic:**
+
 - Only provided fields are updated
 - Validations applied to provided fields only
 - Common use case: Publishing a draft video (`status: "published"`)
 - `updated_at` automatically updated
 
 **Common Use Cases:**
+
 1. Publish draft: `PATCH /api/videos/:id { "status": "published" }`
 2. Archive video: `PATCH /api/videos/:id { "status": "archived" }`
 3. Toggle premium: `PATCH /api/videos/:id { "is_premium": true }`
@@ -598,9 +607,9 @@ Authorization: Bearer <access_token>
 
 **URL Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | UUID | Yes | Video unique identifier |
+| Parameter | Type | Required | Description             |
+| --------- | ---- | -------- | ----------------------- |
+| `id`      | UUID | Yes      | Video unique identifier |
 
 **Request Example:**
 
@@ -643,12 +652,14 @@ No response body.
 ```
 
 **Business Logic:**
+
 - RLS policy enforces admin-only access
 - Deletes database record only
 - Files in Supabase Storage must be deleted separately
 - **Recommendation:** Use `PATCH` to set `status: "archived"` instead of permanent deletion
 
 **Important Notes:**
+
 - Deletion is permanent and cannot be undone
 - Associated storage files (video, thumbnail) are NOT automatically deleted
 - Consider archiving (`status: "archived"`) instead of deletion for data retention
@@ -667,21 +678,18 @@ No response body.
 
 ```typescript
 // Free video (public bucket)
-const videoUrl = supabase.storage
-  .from('videos-free')
-  .getPublicUrl('morning-yoga-flow.mp4').data.publicUrl
+const videoUrl = supabase.storage.from("videos-free").getPublicUrl("morning-yoga-flow.mp4").data.publicUrl;
 
 // Premium video (private bucket, requires auth)
-const { data, error } = await supabase.storage
-  .from('videos-premium')
-  .createSignedUrl('advanced-mobility.mp4', 3600) // 1 hour expiry
+const { data, error } = await supabase.storage.from("videos-premium").createSignedUrl("advanced-mobility.mp4", 3600); // 1 hour expiry
 
 if (data) {
-  const videoUrl = data.signedUrl
+  const videoUrl = data.signedUrl;
 }
 ```
 
 **Access Control:**
+
 - `videos-free` bucket: Public read access
 - `videos-premium` bucket: Requires authenticated user with premium/admin role
 - Storage RLS policies enforce access control automatically
@@ -697,12 +705,11 @@ if (data) {
 **Implementation:**
 
 ```typescript
-const thumbnailUrl = supabase.storage
-  .from('thumbnails')
-  .getPublicUrl('morning-yoga-flow.jpg').data.publicUrl
+const thumbnailUrl = supabase.storage.from("thumbnails").getPublicUrl("morning-yoga-flow.jpg").data.publicUrl;
 ```
 
 **Access Control:**
+
 - `thumbnails` bucket: Public read access for all thumbnails
 - Even premium video thumbnails are public (allows preview)
 
@@ -776,38 +783,38 @@ All errors follow this structure:
 
 ### 6.2 HTTP Status Codes
 
-| Code | Status | Description | Use Case |
-|------|--------|-------------|----------|
-| 200 | OK | Success | GET, PUT, PATCH successful |
-| 201 | Created | Resource created | POST successful |
-| 204 | No Content | Success with no body | DELETE successful |
-| 400 | Bad Request | Invalid input | Validation errors, malformed JSON |
-| 401 | Unauthorized | Not authenticated | Missing or invalid auth token |
-| 403 | Forbidden | Insufficient permissions | Wrong role for operation |
-| 404 | Not Found | Resource doesn't exist | Invalid ID or unauthorized access |
-| 409 | Conflict | Resource conflict | Duplicate title, constraint violation |
-| 422 | Unprocessable Entity | Semantic errors | Business logic validation failed |
-| 429 | Too Many Requests | Rate limit exceeded | Too many requests from client |
-| 500 | Internal Server Error | Server error | Unexpected server-side error |
-| 503 | Service Unavailable | Service down | Database or storage unavailable |
+| Code | Status                | Description              | Use Case                              |
+| ---- | --------------------- | ------------------------ | ------------------------------------- |
+| 200  | OK                    | Success                  | GET, PUT, PATCH successful            |
+| 201  | Created               | Resource created         | POST successful                       |
+| 204  | No Content            | Success with no body     | DELETE successful                     |
+| 400  | Bad Request           | Invalid input            | Validation errors, malformed JSON     |
+| 401  | Unauthorized          | Not authenticated        | Missing or invalid auth token         |
+| 403  | Forbidden             | Insufficient permissions | Wrong role for operation              |
+| 404  | Not Found             | Resource doesn't exist   | Invalid ID or unauthorized access     |
+| 409  | Conflict              | Resource conflict        | Duplicate title, constraint violation |
+| 422  | Unprocessable Entity  | Semantic errors          | Business logic validation failed      |
+| 429  | Too Many Requests     | Rate limit exceeded      | Too many requests from client         |
+| 500  | Internal Server Error | Server error             | Unexpected server-side error          |
+| 503  | Service Unavailable   | Service down             | Database or storage unavailable       |
 
 ### 6.3 Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `VALIDATION_ERROR` | 400 | Request validation failed |
-| `INVALID_PARAMETER` | 400 | Invalid query parameter |
-| `MALFORMED_REQUEST` | 400 | Invalid JSON or request format |
-| `UNAUTHORIZED` | 401 | Authentication required |
-| `INVALID_TOKEN` | 401 | Auth token invalid or expired |
-| `FORBIDDEN` | 403 | Insufficient permissions |
-| `NOT_FOUND` | 404 | Resource not found |
-| `CONFLICT` | 409 | Resource conflict |
-| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
-| `INTERNAL_ERROR` | 500 | Internal server error |
-| `DATABASE_ERROR` | 500 | Database operation failed |
-| `STORAGE_ERROR` | 500 | Storage operation failed |
-| `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+| Code                  | HTTP Status | Description                     |
+| --------------------- | ----------- | ------------------------------- |
+| `VALIDATION_ERROR`    | 400         | Request validation failed       |
+| `INVALID_PARAMETER`   | 400         | Invalid query parameter         |
+| `MALFORMED_REQUEST`   | 400         | Invalid JSON or request format  |
+| `UNAUTHORIZED`        | 401         | Authentication required         |
+| `INVALID_TOKEN`       | 401         | Auth token invalid or expired   |
+| `FORBIDDEN`           | 403         | Insufficient permissions        |
+| `NOT_FOUND`           | 404         | Resource not found              |
+| `CONFLICT`            | 409         | Resource conflict               |
+| `RATE_LIMIT_EXCEEDED` | 429         | Too many requests               |
+| `INTERNAL_ERROR`      | 500         | Internal server error           |
+| `DATABASE_ERROR`      | 500         | Database operation failed       |
+| `STORAGE_ERROR`       | 500         | Storage operation failed        |
+| `SERVICE_UNAVAILABLE` | 503         | Service temporarily unavailable |
 
 ### 6.4 Validation Error Details
 
@@ -844,36 +851,37 @@ Validation errors include field-specific information:
 
 ### 7.1 Video Resource Validation
 
-| Field | Validation Rules |
-|-------|------------------|
-| `title` | Required, non-empty string, max 255 characters |
-| `description` | Optional, string, max 5000 characters |
-| `category` | Required, enum: `yoga`, `mobility`, `calisthenics` |
-| `level` | Required, enum: `beginner`, `intermediate`, `advanced` |
-| `duration` | Required, integer, range: 1-7200 (1 second to 2 hours) |
-| `video_url` | Required, string, valid relative path format (e.g., `videos-free/file.mp4`) |
-| `thumbnail_url` | Required, string, valid relative path format (e.g., `thumbnails/file.jpg`) |
-| `is_premium` | Optional, boolean, default: `false` |
-| `status` | Optional, enum: `draft`, `published`, `archived`, default: `draft` |
+| Field           | Validation Rules                                                            |
+| --------------- | --------------------------------------------------------------------------- |
+| `title`         | Required, non-empty string, max 255 characters                              |
+| `description`   | Optional, string, max 5000 characters                                       |
+| `category`      | Required, enum: `yoga`, `mobility`, `calisthenics`                          |
+| `level`         | Required, enum: `beginner`, `intermediate`, `advanced`                      |
+| `duration`      | Required, integer, range: 1-7200 (1 second to 2 hours)                      |
+| `video_url`     | Required, string, valid relative path format (e.g., `videos-free/file.mp4`) |
+| `thumbnail_url` | Required, string, valid relative path format (e.g., `thumbnails/file.jpg`)  |
+| `is_premium`    | Optional, boolean, default: `false`                                         |
+| `status`        | Optional, enum: `draft`, `published`, `archived`, default: `draft`          |
 
 ### 7.2 Query Parameter Validation
 
-| Parameter | Validation Rules |
-|-----------|------------------|
-| `category` | Optional, enum: `yoga`, `mobility`, `calisthenics` |
-| `level` | Optional, enum: `beginner`, `intermediate`, `advanced` |
-| `is_premium` | Optional, boolean: `true`, `false` |
-| `status` | Optional, enum: `draft`, `published`, `archived` (admin only) |
-| `limit` | Optional, integer, range: 1-100, default: 50 |
-| `offset` | Optional, integer, min: 0, default: 0 |
-| `sort` | Optional, enum: `created_at`, `title`, `duration`, default: `created_at` |
-| `order` | Optional, enum: `asc`, `desc`, default: `desc` |
+| Parameter    | Validation Rules                                                         |
+| ------------ | ------------------------------------------------------------------------ |
+| `category`   | Optional, enum: `yoga`, `mobility`, `calisthenics`                       |
+| `level`      | Optional, enum: `beginner`, `intermediate`, `advanced`                   |
+| `is_premium` | Optional, boolean: `true`, `false`                                       |
+| `status`     | Optional, enum: `draft`, `published`, `archived` (admin only)            |
+| `limit`      | Optional, integer, range: 1-100, default: 50                             |
+| `offset`     | Optional, integer, min: 0, default: 0                                    |
+| `sort`       | Optional, enum: `created_at`, `title`, `duration`, default: `created_at` |
+| `order`      | Optional, enum: `asc`, `desc`, default: `desc`                           |
 
 ### 7.3 Path Format Validation
 
 Video and thumbnail URLs must follow these patterns:
 
 **Valid formats:**
+
 - `videos-free/filename.mp4`
 - `videos-premium/filename.mp4`
 - `thumbnails/filename.jpg`
@@ -881,6 +889,7 @@ Video and thumbnail URLs must follow these patterns:
 - `thumbnails/filename.webp`
 
 **Invalid formats:**
+
 - Absolute URLs: `https://example.com/video.mp4`
 - URLs with query params: `videos-free/file.mp4?token=abc`
 - Paths with `..`: `videos-free/../other/file.mp4`
@@ -895,30 +904,35 @@ Video and thumbnail URLs must follow these patterns:
 **Implementation:** Supabase Row Level Security (RLS) policies
 
 **Anonymous Users:**
+
 ```sql
 -- Can only see free published videos
 WHERE is_premium = false AND status = 'published'
 ```
 
 **Free Users (authenticated, role = 'free'):**
+
 ```sql
 -- Same as anonymous
 WHERE is_premium = false AND status = 'published'
 ```
 
 **Premium Users (authenticated, role = 'premium'):**
+
 ```sql
 -- Can see all published videos
 WHERE status = 'published'
 ```
 
 **Admin Users (authenticated, role = 'admin'):**
+
 ```sql
 -- Can see all videos regardless of status
 -- No WHERE clause restriction
 ```
 
 **Mutations (INSERT/UPDATE/DELETE):**
+
 ```sql
 -- Only admin role
 WHERE (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
@@ -926,12 +940,12 @@ WHERE (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 
 ### 8.2 Video Visibility Rules
 
-| User Role | Free Videos | Premium Videos | Draft Videos | Archived Videos |
-|-----------|-------------|----------------|--------------|-----------------|
-| Anonymous | ✅ Published | ❌ | ❌ | ❌ |
-| Free | ✅ Published | ❌ | ❌ | ❌ |
-| Premium | ✅ Published | ✅ Published | ❌ | ❌ |
-| Admin | ✅ All | ✅ All | ✅ All | ✅ All |
+| User Role | Free Videos  | Premium Videos | Draft Videos | Archived Videos |
+| --------- | ------------ | -------------- | ------------ | --------------- |
+| Anonymous | ✅ Published | ❌             | ❌           | ❌              |
+| Free      | ✅ Published | ❌             | ❌           | ❌              |
+| Premium   | ✅ Published | ✅ Published   | ❌           | ❌              |
+| Admin     | ✅ All       | ✅ All         | ✅ All       | ✅ All          |
 
 ### 8.3 Publishing Workflow
 
@@ -944,6 +958,7 @@ WHERE (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 ### 8.4 Premium Content Gating
 
 **Frontend Implementation:**
+
 ```typescript
 // Check if user can access video
 const canAccess = (video: Video, userRole: UserRole | null): boolean => {
@@ -951,12 +966,12 @@ const canAccess = (video: Video, userRole: UserRole | null): boolean => {
   if (video.status !== 'published' && userRole !== 'admin') {
     return false
   }
-  
+
   // Premium check
   if (video.is_premium) {
     return userRole === 'premium' || userRole === 'admin'
   }
-  
+
   // Free content accessible to all
   return true
 }
@@ -972,6 +987,7 @@ return <VideoPlayer video={video} />
 ```
 
 **Backend Implementation:**
+
 - RLS policies automatically prevent unauthorized queries
 - API returns 404 for unauthorized access (security best practice - don't reveal existence)
 - Storage RLS prevents direct file access
@@ -983,11 +999,13 @@ return <VideoPlayer video={video} />
 ### 9.1 Database Query Optimization
 
 **Indexes Used:**
+
 - Primary key: `videos(id)` - automatic
 - Composite: `videos(category, is_premium, status)` - for filtered lists
 - Single: `videos(status)` - for admin filtering
 
 **Query Performance Targets:**
+
 - List videos: < 100ms
 - Get video by ID: < 50ms
 - Create/Update/Delete: < 200ms
@@ -997,6 +1015,7 @@ return <VideoPlayer video={video} />
 **Default:** 50 items per page (configurable via `limit` parameter)
 
 **Implementation:**
+
 ```sql
 SELECT * FROM videos
 WHERE <filters>
@@ -1009,6 +1028,7 @@ LIMIT 50 OFFSET 0
 ### 9.3 Caching Strategy
 
 **Not implemented in MVP** but recommended for future:
+
 - Cache video list responses (5-10 minutes)
 - Cache individual video metadata (1 hour)
 - Invalidate cache on video updates
@@ -1017,6 +1037,7 @@ LIMIT 50 OFFSET 0
 ### 9.4 Rate Limiting
 
 **Recommended Limits:**
+
 - Anonymous: 100 requests/hour
 - Authenticated: 1000 requests/hour
 - Admin: 5000 requests/hour
@@ -1058,6 +1079,7 @@ LIMIT 50 OFFSET 0
 ### 10.5 CORS Configuration
 
 **Allowed Origins:**
+
 - Development: `http://localhost:4321`
 - Production: `https://[your-domain]`
 
@@ -1078,6 +1100,7 @@ LIMIT 50 OFFSET 0
 ### 11.2 Future Versioning Strategy
 
 When breaking changes are needed:
+
 - Introduce versioned paths: `/api/v2/videos`
 - Maintain backward compatibility for v1
 - Deprecation period: 6 months minimum
@@ -1090,6 +1113,7 @@ When breaking changes are needed:
 ### 12.1 Unit Tests
 
 Test individual endpoint handlers:
+
 - Input validation
 - Error handling
 - Response formatting
@@ -1097,6 +1121,7 @@ Test individual endpoint handlers:
 ### 12.2 Integration Tests
 
 Test API with real Supabase instance:
+
 - Authentication flows
 - RLS policy enforcement
 - CRUD operations
@@ -1105,6 +1130,7 @@ Test API with real Supabase instance:
 ### 12.3 Test Scenarios
 
 **Authentication:**
+
 - ✅ Anonymous user access
 - ✅ Authenticated free user
 - ✅ Authenticated premium user
@@ -1113,6 +1139,7 @@ Test API with real Supabase instance:
 - ❌ Expired token
 
 **Video Access:**
+
 - ✅ Free user views free video
 - ❌ Free user views premium video
 - ✅ Premium user views premium video
@@ -1120,6 +1147,7 @@ Test API with real Supabase instance:
 - ✅ Admin views draft video
 
 **CRUD Operations:**
+
 - ✅ Admin creates video
 - ❌ Non-admin creates video
 - ✅ Admin updates video
@@ -1127,6 +1155,7 @@ Test API with real Supabase instance:
 - ❌ Non-admin deletes video
 
 **Validation:**
+
 - ❌ Invalid category
 - ❌ Duration out of range
 - ❌ Missing required fields
@@ -1139,12 +1168,14 @@ Test API with real Supabase instance:
 ### 13.1 Logging Strategy
 
 **Log Levels:**
+
 - `ERROR`: Failed requests, exceptions
 - `WARN`: Authorization failures, validation errors
 - `INFO`: Successful requests, user actions
 - `DEBUG`: Detailed request/response data (dev only)
 
 **Log Format:**
+
 ```json
 {
   "timestamp": "2026-01-18T16:30:00Z",
@@ -1183,101 +1214,72 @@ Test API with real Supabase instance:
 ### 14.1 TypeScript/JavaScript (Frontend)
 
 ```typescript
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from './database.types'
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
-const supabase = createClient<Database>(
-  process.env.PUBLIC_SUPABASE_URL!,
-  process.env.PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_URL!, process.env.PUBLIC_SUPABASE_ANON_KEY!);
 
 // List videos
 async function getVideos(category?: string) {
-  let query = supabase
-    .from('videos')
-    .select('*')
-    .eq('status', 'published')
-    .order('created_at', { ascending: false })
-  
+  let query = supabase.from("videos").select("*").eq("status", "published").order("created_at", { ascending: false });
+
   if (category) {
-    query = query.eq('category', category)
+    query = query.eq("category", category);
   }
-  
-  const { data, error } = await query
-  
-  if (error) throw error
-  return data
+
+  const { data, error } = await query;
+
+  if (error) throw error;
+  return data;
 }
 
 // Get video by ID
 async function getVideo(id: string) {
-  const { data, error } = await supabase
-    .from('videos')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) throw error
-  return data
+  const { data, error } = await supabase.from("videos").select("*").eq("id", id).single();
+
+  if (error) throw error;
+  return data;
 }
 
 // Create video (admin only)
-async function createVideo(video: Omit<Video, 'id' | 'created_at' | 'updated_at'>) {
-  const { data, error } = await supabase
-    .from('videos')
-    .insert(video)
-    .select()
-    .single()
-  
-  if (error) throw error
-  return data
+async function createVideo(video: Omit<Video, "id" | "created_at" | "updated_at">) {
+  const { data, error } = await supabase.from("videos").insert(video).select().single();
+
+  if (error) throw error;
+  return data;
 }
 
 // Update video (admin only)
 async function updateVideo(id: string, updates: Partial<Video>) {
-  const { data, error } = await supabase
-    .from('videos')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single()
-  
-  if (error) throw error
-  return data
+  const { data, error } = await supabase.from("videos").update(updates).eq("id", id).select().single();
+
+  if (error) throw error;
+  return data;
 }
 
 // Delete video (admin only)
 async function deleteVideo(id: string) {
-  const { error } = await supabase
-    .from('videos')
-    .delete()
-    .eq('id', id)
-  
-  if (error) throw error
+  const { error } = await supabase.from("videos").delete().eq("id", id);
+
+  if (error) throw error;
 }
 
 // Get video stream URL
 function getVideoUrl(video: Video) {
-  const bucket = video.is_premium ? 'videos-premium' : 'videos-free'
-  
+  const bucket = video.is_premium ? "videos-premium" : "videos-free";
+
   if (video.is_premium) {
     // Premium videos use signed URLs
-    return supabase.storage
-      .from(bucket)
-      .createSignedUrl(video.video_url, 3600)
+    return supabase.storage.from(bucket).createSignedUrl(video.video_url, 3600);
   } else {
     // Free videos use public URLs
-    return supabase.storage
-      .from(bucket)
-      .getPublicUrl(video.video_url)
+    return supabase.storage.from(bucket).getPublicUrl(video.video_url);
   }
 }
 
 // Get thumbnail URL
 function getThumbnailUrl(video: Video) {
-  return supabase.storage
-    .from('thumbnails')
-    .getPublicUrl(video.thumbnail_url).data.publicUrl
+  return supabase.storage.from("thumbnails").getPublicUrl(video.thumbnail_url).data.publicUrl;
 }
 ```
 
@@ -1324,6 +1326,7 @@ curl -X DELETE https://[domain]/api/videos/550e8400-e29b-41d4-a716-446655440000 
 ## 15. Implementation Checklist
 
 ### Phase 1: Core Endpoints
+
 - [ ] Setup Astro API routes structure
 - [ ] Configure Supabase client with environment variables
 - [ ] Implement GET /api/videos (list with filtering)
@@ -1333,6 +1336,7 @@ curl -X DELETE https://[domain]/api/videos/550e8400-e29b-41d4-a716-446655440000 
 - [ ] Test with different user roles
 
 ### Phase 2: Admin Endpoints
+
 - [ ] Implement POST /api/videos (create)
 - [ ] Implement PUT /api/videos/:id (full update)
 - [ ] Implement PATCH /api/videos/:id (partial update)
@@ -1341,6 +1345,7 @@ curl -X DELETE https://[domain]/api/videos/550e8400-e29b-41d4-a716-446655440000 
 - [ ] Test admin-only access control
 
 ### Phase 3: Storage Integration
+
 - [ ] Configure Supabase Storage buckets
 - [ ] Implement storage RLS policies
 - [ ] Add helper functions for URL generation
@@ -1348,6 +1353,7 @@ curl -X DELETE https://[domain]/api/videos/550e8400-e29b-41d4-a716-446655440000 
 - [ ] Test public URLs for free content
 
 ### Phase 4: Polish
+
 - [ ] Implement GET /api/health endpoint
 - [ ] Add comprehensive error messages
 - [ ] Add request/response logging
@@ -1356,6 +1362,7 @@ curl -X DELETE https://[domain]/api/videos/550e8400-e29b-41d4-a716-446655440000 
 - [ ] Add integration tests
 
 ### Phase 5: Optimization
+
 - [ ] Add pagination to list endpoint
 - [ ] Implement rate limiting
 - [ ] Add response caching headers
@@ -1424,58 +1431,58 @@ Bulk operations for admin efficiency.
 
 ```typescript
 // Database types (auto-generated from Supabase)
-export type VideoCategory = 'yoga' | 'mobility' | 'calisthenics'
-export type VideoLevel = 'beginner' | 'intermediate' | 'advanced'
-export type VideoStatus = 'draft' | 'published' | 'archived'
-export type UserRole = 'free' | 'premium' | 'admin'
+export type VideoCategory = "yoga" | "mobility" | "calisthenics";
+export type VideoLevel = "beginner" | "intermediate" | "advanced";
+export type VideoStatus = "draft" | "published" | "archived";
+export type UserRole = "free" | "premium" | "admin";
 
 export interface Video {
-  id: string // UUID
-  title: string
-  description: string | null
-  category: VideoCategory
-  level: VideoLevel
-  duration: number // seconds
-  video_url: string
-  thumbnail_url: string
-  is_premium: boolean
-  status: VideoStatus
-  created_at: string // ISO timestamp
-  updated_at: string // ISO timestamp
+  id: string; // UUID
+  title: string;
+  description: string | null;
+  category: VideoCategory;
+  level: VideoLevel;
+  duration: number; // seconds
+  video_url: string;
+  thumbnail_url: string;
+  is_premium: boolean;
+  status: VideoStatus;
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 }
 
 export interface VideoListResponse {
-  data: Video[]
+  data: Video[];
   meta: {
-    total: number
-    limit: number
-    offset: number
-    count: number
-  }
+    total: number;
+    limit: number;
+    offset: number;
+    count: number;
+  };
 }
 
 export interface VideoResponse {
-  data: Video
+  data: Video;
 }
 
 export interface ErrorResponse {
   error: {
-    code: string
-    message: string
-    details?: Record<string, any>
-  }
+    code: string;
+    message: string;
+    details?: Record<string, any>;
+  };
 }
 
 export interface CreateVideoRequest {
-  title: string
-  description?: string
-  category: VideoCategory
-  level: VideoLevel
-  duration: number
-  video_url: string
-  thumbnail_url: string
-  is_premium?: boolean
-  status?: VideoStatus
+  title: string;
+  description?: string;
+  category: VideoCategory;
+  level: VideoLevel;
+  duration: number;
+  video_url: string;
+  thumbnail_url: string;
+  is_premium?: boolean;
+  status?: VideoStatus;
 }
 
 export interface UpdateVideoRequest extends CreateVideoRequest {}

@@ -1,19 +1,22 @@
 # Product Requirements Document (PRD)
+
 ## Platforma do Udostępniania Nagrań Ćwiczeń Fizycznych
 
 **Wersja:** 1.0  
 **Data:** 13 stycznia 2026  
 **Status:** Draft - POC  
-**Autor:** Product Manager  
+**Autor:** Product Manager
 
 ---
 
 ## 1. Executive Summary
 
 ### 1.1 Cel Projektu
+
 Stworzenie prostej platformy webowej do udostępniania nagrań wideo z ćwiczeniami fizycznymi (yoga, mobilność, kalistenika) dla małej grupy użytkowników (~20 osób). Platforma będzie działać w modelu freemium - część treści dostępna publicznie, część tylko dla wybranych użytkowników premium.
 
 ### 1.2 Kluczowe Założenia
+
 - **Timeframe:** 3 tygodnie (development po godzinach pracy)
 - **Scope:** MVP/POC - minimalna funkcjonalność
 - **Użytkownicy:** ~20 osób
@@ -21,6 +24,7 @@ Stworzenie prostej platformy webowej do udostępniania nagrań wideo z ćwiczeni
 - **Model biznesowy:** Freemium bez systemu płatności
 
 ### 1.3 Stack Technologiczny
+
 - **Frontend:** Astro + React + TypeScript
 - **Styling:** Tailwind CSS (+ daisyUI/shadcn-ui dla komponentów)
 - **Backend/Auth/Storage:** Supabase
@@ -32,9 +36,11 @@ Stworzenie prostej platformy webowej do udostępniania nagrań wideo z ćwiczeni
 ## 2. Problem Statement
 
 ### 2.1 Problem Użytkownika
+
 Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagrań treningowych wybranej grupie uczestników, z możliwością kontrolowania dostępu bez komplikowania procesu płatnościami.
 
 ### 2.2 Istniejące Rozwiązania i ich Wady
+
 - **YouTube/Vimeo:** Brak kontroli dostępu dla wybranych użytkowników
 - **Platformy kursowe (Teachable, Kajabi):** Za skomplikowane i kosztowne dla małej grupy
 - **Google Drive:** Słabe doświadczenie oglądania wideo, brak organizacji
@@ -44,16 +50,19 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 ## 3. User Personas
 
 ### 3.1 Persona 1: Administrator/Instruktor (Ty)
+
 - **Potrzeby:** Szybki upload nagrań, kontrola dostępu, prosta organizacja treści
 - **Pain points:** Ograniczony czas, potrzeba prostoty
 - **Tech skills:** Zaawansowane (developer)
 
 ### 3.2 Persona 2: Użytkownik Free
+
 - **Potrzeby:** Dostęp do podstawowych/darmowych nagrań, łatwa nawigacja
 - **Pain points:** Chce zobaczyć jakość przed decyzją o premium
 - **Tech skills:** Podstawowe/średnie
 
 ### 3.3 Persona 3: Użytkownik Premium
+
 - **Potrzeby:** Dostęp do wszystkich treści, wygodne oglądanie
 - **Pain points:** Chce wartościowe treści bez komplikacji
 - **Tech skills:** Podstawowe/średnie
@@ -109,6 +118,7 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 **FR-01:** Wyświetlanie wszystkich nagrań w gridzie (2-3 kolumny responsive)
 
 **FR-02:** Każda karta nagrania zawiera:
+
 - Miniaturka
 - Tytuł
 - Czas trwania
@@ -117,6 +127,7 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 - Badge "Premium" (jeśli płatne) z efektem blur dla niezalogowanych/free users
 
 **FR-03:** Buttony filtrowania nad gridem:
+
 - Wszystkie
 - Yoga
 - Mobilność
@@ -125,6 +136,7 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 **FR-04:** Filtrowanie działa przez query params: `/?category=yoga`
 
 **FR-05:** Navbar zawiera:
+
 - Logo (link do home)
 - Kategorie jako filtry
 - Przycisk "Login" (niezalogowany) lub Avatar/Email + "Logout" (zalogowany)
@@ -133,6 +145,7 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 ### 5.2 Strona Szczegółów Nagrania (`/video/[id]`)
 
 **FR-06:** Odtwarzacz wideo (video.js/Plyr) z:
+
 - Play/pause
 - Progress bar
 - Volume control
@@ -140,12 +153,14 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 - Speed control (0.5x, 0.75x, 1x, 1.25x, 1.5x, 2x)
 
 **FR-07:** Sekcja informacji pod odtwarzaczem:
+
 - Tytuł
 - Kategoria + poziom
 - Pełny opis
 - Czas trwania
 
 **FR-08:** Kontrola dostępu:
+
 - Nagrania free: dostępne dla wszystkich
 - Nagrania premium: tylko dla zalogowanych z rolą premium/admin
 - Próba dostępu bez uprawnień → komunikat: "Ta treść jest dostępna tylko dla użytkowników premium. Skontaktuj się z [email], aby uzyskać dostęp."
@@ -161,6 +176,7 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 **FR-12:** Opcjonalnie: Google OAuth jako alternatywa
 
 **FR-13:** Minimalne dane użytkownika:
+
 - Email (wymagany)
 - Imię/nick (opcjonalne)
 - Rola (admin/premium/free)
@@ -168,10 +184,12 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 ### 5.4 Zarządzanie Treścią (Admin)
 
 **FR-14:** Upload przez Supabase Storage Dashboard:
+
 - Plik wideo (MP4 recommended)
 - Miniaturka (JPG/PNG)
 
 **FR-15:** Tabela `videos` w Supabase z polami:
+
 - `id` (UUID, primary key)
 - `title` (string)
 - `description` (text)
@@ -191,6 +209,7 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 ### 5.5 Security & Permissions
 
 **FR-18:** Row Level Security (RLS) policies w Supabase:
+
 - **Videos (SELECT):**
   - Everyone: `is_premium = false`
   - Authenticated + (premium OR admin): `is_premium = true`
@@ -200,6 +219,7 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
   - Write: admin only
 
 **FR-19:** Frontend route guards:
+
 - `/video/[id]` sprawdza uprawnienia przed renderowaniem playera
 - Nielegalne żądania → error message
 
@@ -208,11 +228,13 @@ Instruktorzy fitness potrzebują prostego sposobu na udostępnianie swoich nagra
 **FR-20:** Strona 404 dla nieistniejących tras/nagrań
 
 **FR-21:** Toast notifications dla akcji użytkownika (np. Sonner):
+
 - Login success
 - Brak uprawnień
 - Błąd ładowania wideo
 
 **FR-22:** Loading states:
+
 - Skeleton loader dla grid podczas ładowania
 - Spinner dla video player
 - Loading overlay dla operacji auth
@@ -249,6 +271,7 @@ src/
 ### 6.2 Database Schema (Supabase)
 
 **Table: videos**
+
 ```sql
 CREATE TABLE videos (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -270,6 +293,7 @@ CREATE INDEX idx_videos_is_premium ON videos(is_premium);
 ```
 
 **User Metadata (Supabase Auth)**
+
 ```json
 {
   "role": "free" | "premium" | "admin",
@@ -278,6 +302,7 @@ CREATE INDEX idx_videos_is_premium ON videos(is_premium);
 ```
 
 **Storage Buckets:**
+
 - `videos` - dla plików wideo
 - `thumbnails` - dla miniaturek
 
@@ -292,8 +317,8 @@ USING (is_premium = false);
 CREATE POLICY "Premium videos for authenticated premium/admin users"
 ON videos FOR SELECT
 USING (
-  is_premium = true 
-  AND auth.uid() IS NOT NULL 
+  is_premium = true
+  AND auth.uid() IS NOT NULL
   AND (
     (auth.jwt() -> 'user_metadata' ->> 'role') = 'premium'
     OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
@@ -385,25 +410,30 @@ USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 ## 8. Non-Functional Requirements
 
 ### 8.1 Performance
+
 - **NFR-01:** Strona główna ładuje się < 3s (good 3G)
 - **NFR-02:** Video streaming start < 2s
 - **NFR-03:** Obrazki (miniatury) optimized (WebP, lazy loading)
 
 ### 8.2 Accessibility
+
 - **NFR-04:** Semantic HTML (Astro default)
 - **NFR-05:** Keyboard navigation dla video player
 - **NFR-06:** Alt texts dla miniaturek
 
 ### 8.3 Responsiveness
+
 - **NFR-07:** Mobile-first design
 - **NFR-08:** Breakpoints: mobile (< 640px), tablet (640-1024px), desktop (> 1024px)
 - **NFR-09:** Video player fullscreen support
 
 ### 8.4 Browser Support
+
 - **NFR-10:** Chrome/Edge/Safari/Firefox (ostatnie 2 wersje)
 - **NFR-11:** iOS Safari (mobile)
 
 ### 8.5 Security
+
 - **NFR-12:** HTTPS only
 - **NFR-13:** Supabase RLS enforced
 - **NFR-14:** No sensitive data w localStorage (tylko auth tokens)
@@ -413,6 +443,7 @@ USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 ## 9. Design & UI
 
 ### 9.1 Color Scheme
+
 - **Primary:** #6366f1 (indigo) - akcje, linki
 - **Secondary:** #8b5cf6 (purple) - premium badges
 - **Background:** #0f172a (slate-900) - dark theme
@@ -421,12 +452,14 @@ USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 - **Text Secondary:** #94a3b8 (slate-400) - meta info
 
 ### 9.2 Typography
+
 - **Font Family:** Inter lub Poppins (Google Fonts)
 - **Headings:** Font weight 600-700
 - **Body:** Font weight 400
 - **Meta:** Font size sm (0.875rem)
 
 ### 9.3 Components (daisyUI/shadcn-ui)
+
 - **Button:** Primary (indigo), Secondary (outline)
 - **Card:** Rounded, shadow, hover effect
 - **Badge:** Small pill shape dla premium/kategorii
@@ -434,6 +467,7 @@ USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 - **Avatar:** Circular, 2-3 sizes
 
 ### 9.4 Spacing
+
 - **Grid gap:** 1.5rem (24px)
 - **Card padding:** 1rem (16px)
 - **Section padding:** 2-4rem (32-64px)
@@ -445,55 +479,52 @@ USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 **Assumptions:** 2-3h/dzień, 5 dni/tydzień = ~30-45h total
 
 ### Week 1: Foundation (12-15h)
+
 - **Day 1-2 (4-6h):** Setup
   - Init Astro project + TypeScript + Tailwind
   - Setup Supabase project
   - Configure auth (magic link)
   - Create database schema + RLS policies
   - Setup storage buckets
-  
 - **Day 3-4 (5-6h):** Core UI
   - Layout + Navbar component
   - VideoCard component
   - VideoGrid with static data
   - Responsive styling
-  
 - **Day 5 (3h):** Auth Integration
   - Login flow
   - Auth state management
   - Protected routes
 
 ### Week 2: Features (15-18h)
+
 - **Day 1-2 (6h):** Video Page
   - Dynamic route `/video/[id]`
   - Video player integration (video.js/Plyr)
   - Speed controls
   - Premium content gating
-  
 - **Day 3-4 (6-8h):** Data Integration
   - Connect Supabase to VideoGrid
   - Fetch videos with RLS
   - Category filtering
   - Loading states
-  
 - **Day 5 (3-4h):** Admin Workflow
   - Document upload process
   - Test manual video upload
   - User role assignment
 
 ### Week 3: Polish & Deploy (12-15h)
+
 - **Day 1-2 (5-6h):** Error Handling & Edge Cases
   - 404 page
   - Error messages
   - Toast notifications
   - Premium access denial UI
-  
 - **Day 3 (3-4h):** Testing
   - Test all user flows
   - Mobile responsive check
   - Cross-browser testing
   - Fix bugs
-  
 - **Day 4-5 (4-5h):** Deployment
   - Deploy to Bolt.new / VPS OVH
   - Configure env variables
@@ -506,6 +537,7 @@ USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 ## 11. Success Criteria
 
 ### 11.1 Launch Criteria (Must Have)
+
 ✅ Użytkownik może zobaczyć wszystkie nagrania na stronie głównej  
 ✅ Użytkownik może filtrować po kategoriach  
 ✅ Użytkownik free widzi premium content jako blur z badge  
@@ -514,9 +546,10 @@ USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 ✅ Video player działa z kontrolą prędkości  
 ✅ Strona jest responsywna (mobile + desktop)  
 ✅ Admin może uploadować nagrania przez Supabase  
-✅ Admin może edytować metadane nagrań  
+✅ Admin może edytować metadane nagrań
 
 ### 11.2 Post-Launch Success (Nice to Have)
+
 - ⭐ 15+ użytkowników zarejestrowanych w miesiąc 1
 - ⭐ Każde nagranie obejrzane średnio 5+ razy
 - ⭐ 0 critical bugs w miesiąc 1
@@ -540,31 +573,33 @@ Poniższe funkcjonalności **NIE** będą implementowane w MVP:
 ❌ **Playlists/Collections** - pojedyncze nagrania tylko  
 ❌ **Download option** - streaming only  
 ❌ **Certyfikaty po ukończeniu** - brak gamification  
-❌ **Live streaming** - tylko pre-recorded  
+❌ **Live streaming** - tylko pre-recorded
 
 ---
 
 ## 13. Risks & Mitigations
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Supabase free tier limits przekroczone | High | Low | Monitor usage, upgrade plan jeśli potrzeba (~$25/m) |
-| Brak czasu na completion w 3 tygodnie | High | Medium | Priorytetyzacja core features, cut scope jeśli potrzeba |
-| Video upload > 50MB slow na słabym internecie | Medium | Medium | Kompresja lokalna przed uploadem (Handbrake) |
-| RLS policies błędnie skonfigurowane (security breach) | High | Low | Testowanie z różnymi rolami, code review |
-| Browser compatibility issues z video player | Medium | Low | Używaj battle-tested library (video.js/Plyr) |
-| User confusion z magic link (nie znajdują emaila) | Medium | Medium | Clear instructions, check spam folder reminder |
+| Risk                                                  | Impact | Probability | Mitigation                                              |
+| ----------------------------------------------------- | ------ | ----------- | ------------------------------------------------------- |
+| Supabase free tier limits przekroczone                | High   | Low         | Monitor usage, upgrade plan jeśli potrzeba (~$25/m)     |
+| Brak czasu na completion w 3 tygodnie                 | High   | Medium      | Priorytetyzacja core features, cut scope jeśli potrzeba |
+| Video upload > 50MB slow na słabym internecie         | Medium | Medium      | Kompresja lokalna przed uploadem (Handbrake)            |
+| RLS policies błędnie skonfigurowane (security breach) | High   | Low         | Testowanie z różnymi rolami, code review                |
+| Browser compatibility issues z video player           | Medium | Low         | Używaj battle-tested library (video.js/Plyr)            |
+| User confusion z magic link (nie znajdują emaila)     | Medium | Medium      | Clear instructions, check spam folder reminder          |
 
 ---
 
 ## 14. Dependencies & Assumptions
 
 ### 14.1 External Dependencies
+
 - Supabase (99.9% uptime SLA)
 - Vercel/Netlify/Bolt hosting (free tier limits)
 - Email delivery dla magic links (Supabase SMTP)
 
 ### 14.2 Assumptions
+
 - Użytkownicy mają stabilne połączenie (min. 3G) do streamingu
 - Admin ma dostęp do narzędzi kompresji wideo (Handbrake/FFmpeg)
 - Użytkownicy rozumieją email-based authentication
@@ -587,6 +622,7 @@ Poniższe funkcjonalności **NIE** będą implementowane w MVP:
 ## 16. Appendix
 
 ### 16.1 Useful Links
+
 - Astro Docs: https://docs.astro.build
 - Supabase Docs: https://supabase.com/docs
 - Video.js: https://videojs.com
@@ -595,6 +631,7 @@ Poniższe funkcjonalności **NIE** będą implementowane w MVP:
 - daisyUI: https://daisyui.com
 
 ### 16.2 Example Video Metadata
+
 ```json
 {
   "title": "Poranna Yoga Flow - 15 min",
