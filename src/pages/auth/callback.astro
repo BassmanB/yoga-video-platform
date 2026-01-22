@@ -1,0 +1,101 @@
+---
+/**
+ * Auth Callback page
+ *
+ * Handles OAuth and magic link callbacks
+ * - Placeholder for backend implementation
+ * - Will exchange token for session
+ * - Redirects to destination or home page
+ *
+ * NOTE: This is a UI placeholder. Backend implementation will be added later.
+ */
+
+import Layout from "@/layouts/Layout.astro";
+
+// TODO: Implement server-side logic when backend is ready
+// const supabase = Astro.locals.supabase;
+// const { searchParams } = Astro.url;
+// const token_hash = searchParams.get("token_hash");
+// const type = searchParams.get("type");
+//
+// if (!token_hash || !type) {
+//   return Astro.redirect("/auth/error?code=invalid_token");
+// }
+//
+// if (type !== "magiclink" && type !== "invite") {
+//   return Astro.redirect("/auth/error?code=invalid_token");
+// }
+//
+// const { data, error } = await supabase.auth.verifyOtp({
+//   token_hash,
+//   type: type as "magiclink" | "invite"
+// });
+//
+// if (error || !data.session) {
+//   console.error("Auth callback error:", error);
+//   return Astro.redirect("/auth/error?code=verification_failed");
+// }
+//
+// const redirectTo = searchParams.get("redirect") || "/";
+// return Astro.redirect(redirectTo);
+---
+
+<Layout title="Logowanie... - YogaFit">
+  <main class="min-h-screen flex items-center justify-center bg-gradient-yoga p-4">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Loading state -->
+      <div class="text-center space-y-6">
+        <div
+          class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/10 border-2 border-primary/20 animate-pulse"
+        >
+          <span class="text-6xl" aria-hidden="true">🔐</span>
+        </div>
+
+        <div class="space-y-3">
+          <h1
+            class="font-display text-3xl font-bold bg-gradient-to-r from-primary via-accent to-secondary text-transparent bg-clip-text"
+          >
+            Trwa logowanie...
+          </h1>
+          <p class="text-lg text-muted-foreground font-body">Sprawdzamy Twoje dane</p>
+        </div>
+
+        <!-- Loading spinner -->
+        <div class="backdrop-blur-xl bg-card/80 rounded-3xl shadow-float p-8 border border-border/50">
+          <div class="flex flex-col items-center gap-4">
+            <div class="relative w-16 h-16">
+              <div class="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+              <div class="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin">
+              </div>
+            </div>
+            <p class="text-sm text-muted-foreground">To potrwa tylko chwilę...</p>
+          </div>
+        </div>
+
+        <!-- Info note -->
+        <div class="backdrop-blur-xl bg-card/60 rounded-2xl p-5 border border-border/30">
+          <p class="text-xs text-muted-foreground text-center leading-relaxed">
+            <strong class="text-foreground">Uwaga:</strong> Jeśli strona nie przekierowuje automatycznie,{" "}
+            <a
+              href="/"
+              class="text-primary hover:text-primary/80 underline decoration-primary/30 hover:decoration-primary transition-colors"
+            >
+              kliknij tutaj
+            </a>
+            {" "}aby przejść do strony głównej.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Auto-redirect script (temporary until backend is implemented) -->
+  <script is:inline>
+    setTimeout(function () {
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect") || "/";
+      console.log("Callback placeholder - would redirect to:", redirect);
+      // window.location.href = redirect;
+    }, 2000);
+  </script>
+</Layout>

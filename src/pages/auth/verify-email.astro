@@ -1,0 +1,100 @@
+---
+/**
+ * Verify Email page
+ *
+ * Confirmation page shown after requesting magic link
+ * - Displays email address where link was sent
+ * - Instructions for user (check spam, etc.)
+ * - Resend email button with rate limiting
+ * - Link back to login page
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import { ResendEmailButton } from "@/components/auth/ResendEmailButton";
+
+// Get email from query params
+const email = Astro.url.searchParams.get("email") || "";
+---
+
+<Layout title="Sprawdź swoją skrzynkę - YogaFit">
+  <main class="min-h-screen flex items-center justify-center bg-gradient-yoga p-4">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Header with icon -->
+      <div class="text-center space-y-4">
+        <div
+          class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20"
+        >
+          <span class="text-5xl" aria-hidden="true">📧</span>
+        </div>
+        <h1
+          class="font-display text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary text-transparent bg-clip-text"
+        >
+          Sprawdź swoją skrzynkę
+        </h1>
+        <p class="text-lg text-muted-foreground font-body">Wysłaliśmy link logowania na adres:</p>
+        <p class="text-xl font-semibold text-foreground break-all px-4">
+          {email || "Twój adres email"}
+        </p>
+      </div>
+
+      <!-- Main content card -->
+      <div class="backdrop-blur-xl bg-card/80 rounded-3xl shadow-float p-8 border border-border/50 space-y-6">
+        <!-- Instructions -->
+        <div class="space-y-4">
+          <p class="text-sm text-muted-foreground text-center leading-relaxed">
+            Kliknij w link w emailu, aby się zalogować. Link jest ważny przez{" "}
+            <span class="font-semibold text-foreground">60 minut</span>.
+          </p>
+
+          <!-- Troubleshooting tips -->
+          <div class="bg-muted/50 rounded-2xl p-5 space-y-3 border border-border/30">
+            <p class="font-semibold text-sm text-foreground">Nie widzisz emaila?</p>
+            <ul class="space-y-2 text-sm text-muted-foreground">
+              <li class="flex items-start gap-2">
+                <span class="text-accent mt-0.5" aria-hidden="true">✓</span>
+                <span>Sprawdź folder spam/wiadomości-śmieci</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent mt-0.5" aria-hidden="true">✓</span>
+                <span>Upewnij się, że adres email jest poprawny</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent mt-0.5" aria-hidden="true">✓</span>
+                <span>Poczekaj kilka minut - czasami email może się opóźnić</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Resend button -->
+        {
+          email && (
+            <div class="pt-2">
+              <ResendEmailButton client:load email={email} />
+            </div>
+          )
+        }
+      </div>
+
+      <!-- Back to login -->
+      <div class="text-center space-y-3">
+        <a
+          href="/auth/login"
+          class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <span class="group-hover:-translate-x-1 transition-transform" aria-hidden="true">←</span>
+          Wróć do logowania
+        </a>
+      </div>
+
+      <!-- Security note -->
+      <div class="backdrop-blur-xl bg-accent/10 rounded-2xl p-4 border border-accent/20">
+        <p class="text-xs text-center text-muted-foreground leading-relaxed">
+          <span class="font-semibold text-foreground">Wskazówka bezpieczeństwa:</span>
+          {" "}Nigdy nie udostępniaj linku logowania innym osobom. Link działa tylko raz i jest powiązany z Twoim
+          adresem email.
+        </p>
+      </div>
+    </div>
+  </main>
+</Layout>

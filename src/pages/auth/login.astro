@@ -1,0 +1,87 @@
+---
+/**
+ * Login page
+ *
+ * Authentication page for existing users to request magic link
+ * - Server-side: Check if already logged in (redirect to home)
+ * - Client-side: LoginForm with magic link request
+ * - Info section for new users about invite-only registration
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+
+// TODO: Add server-side auth check when implementing backend
+// const supabase = Astro.locals.supabase;
+// const { data: { session } } = await supabase.auth.getSession();
+// if (session) {
+//   return Astro.redirect("/");
+// }
+
+// Get redirect URL from query params
+const redirectTo = Astro.url.searchParams.get("redirect") || "/";
+---
+
+<Layout title="Zaloguj się - YogaFit">
+  <main class="min-h-screen flex items-center justify-center bg-gradient-yoga p-4">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Header -->
+      <div class="text-center space-y-3">
+        <a href="/" class="inline-block">
+          <span class="text-6xl" aria-hidden="true">🧘</span>
+        </a>
+        <h1
+          class="font-display text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary text-transparent bg-clip-text"
+        >
+          Zaloguj się
+        </h1>
+        <p class="text-lg text-muted-foreground font-body">Wyślemy Ci link logowania na email</p>
+      </div>
+
+      <!-- Login Form Card -->
+      <div class="backdrop-blur-xl bg-card/80 rounded-3xl shadow-float p-8 border border-border/50 space-y-6">
+        <LoginForm client:load redirectTo={redirectTo} />
+
+        <!-- Divider -->
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-border"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-4 bg-card text-muted-foreground">lub</span>
+          </div>
+        </div>
+
+        <!-- Google OAuth Button -->
+        <GoogleAuthButton client:load redirectTo={redirectTo} />
+      </div>
+
+      <!-- Info for new users -->
+      <div class="backdrop-blur-xl bg-card/60 rounded-2xl p-6 border border-border/30 text-center space-y-3">
+        <p class="text-sm font-semibold text-foreground">Nie masz jeszcze konta?</p>
+        <p class="text-sm text-muted-foreground leading-relaxed">
+          Rejestracja odbywa się tylko poprzez zaproszenie. Skontaktuj się z nami pod adresem{" "}
+          <a
+            href="mailto:admin@yogafit.pl"
+            class="text-primary hover:text-primary/80 font-medium underline decoration-primary/30 hover:decoration-primary transition-colors"
+          >
+            admin@yogafit.pl
+          </a>
+          {" "}aby otrzymać dostęp do platformy.
+        </p>
+      </div>
+
+      <!-- Back to home -->
+      <div class="text-center">
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <span class="group-hover:-translate-x-1 transition-transform" aria-hidden="true">←</span>
+          Wróć na stronę główną
+        </a>
+      </div>
+    </div>
+  </main>
+</Layout>

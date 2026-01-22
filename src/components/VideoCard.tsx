@@ -50,9 +50,7 @@ export function VideoCard({ video, userRole }: VideoCardProps) {
         />
 
         {/* Premium Badge */}
-        {video.is_premium && (
-          <Badge className="absolute top-3 right-3 bg-gradient-sunset shadow-glow">Premium</Badge>
-        )}
+        {video.is_premium && <Badge className="absolute top-3 right-3 bg-gradient-sunset shadow-glow">Premium</Badge>}
 
         {/* Duration Badge */}
         <Badge variant="secondary" className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm">

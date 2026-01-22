@@ -1,0 +1,144 @@
+---
+/**
+ * Authentication Error page
+ *
+ * Displays user-friendly error messages for authentication failures
+ * - Different messages based on error code
+ * - Link back to login page
+ * - Helpful suggestions for resolving issues
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import { Button } from "@/components/ui/button";
+
+// Get error code from query params
+const errorCode = Astro.url.searchParams.get("code") || "unknown";
+
+// Error message mappings
+const errorMessages: Record<string, { title: string; description: string; suggestion?: string }> = {
+  invalid_token: {
+    title: "Nieprawidłowy link",
+    description: "Link logowania jest nieprawidłowy lub wygasł.",
+    suggestion: "Spróbuj zalogować się ponownie, aby otrzymać nowy link.",
+  },
+  verification_failed: {
+    title: "Weryfikacja nie powiodła się",
+    description: "Nie udało się zweryfikować Twojego emaila.",
+    suggestion: "Link mógł wygasnąć. Linki logowania są ważne przez 60 minut.",
+  },
+  email_not_confirmed: {
+    title: "Email niepotwierdzony",
+    description: "Musisz najpierw potwierdzić swój adres email.",
+    suggestion: "Sprawdź swoją skrzynkę email i kliknij w link potwierdzający.",
+  },
+  access_denied: {
+    title: "Brak dostępu",
+    description: "Nie masz uprawnień do wykonania tej akcji.",
+    suggestion: "Skontaktuj się z administratorem, jeśli uważasz, że to błąd.",
+  },
+  session_expired: {
+    title: "Sesja wygasła",
+    description: "Twoja sesja wygasła z powodu braku aktywności.",
+    suggestion: "Zaloguj się ponownie, aby kontynuować.",
+  },
+  rate_limit_exceeded: {
+    title: "Za dużo prób",
+    description: "Przekroczono limit prób logowania.",
+    suggestion: "Poczekaj kilka minut i spróbuj ponownie.",
+  },
+  oauth_error: {
+    title: "Błąd logowania przez Google",
+    description: "Nie udało się zalogować przez konto Google.",
+    suggestion: "Spróbuj użyć logowania przez email lub spróbuj ponownie później.",
+  },
+  unknown: {
+    title: "Wystąpił błąd",
+    description: "Coś poszło nie tak podczas logowania.",
+    suggestion: "Spróbuj ponownie później lub skontaktuj się z pomocą techniczną.",
+  },
+};
+
+const error = errorMessages[errorCode] || errorMessages.unknown;
+
+// Determine icon based on error type
+const getErrorIcon = (code: string) => {
+  if (code === "access_denied") return "🚫";
+  if (code === "rate_limit_exceeded") return "⏱️";
+  if (code === "session_expired") return "⌛";
+  return "⚠️";
+};
+
+const errorIcon = getErrorIcon(errorCode);
+---
+
+<Layout title={`${error.title} - YogaFit`}>
+  <main class="min-h-screen flex items-center justify-center bg-gradient-yoga p-4">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Error icon and header -->
+      <div class="text-center space-y-4">
+        <div
+          class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-50 dark:bg-red-950/20 border-2 border-red-200 dark:border-red-900"
+        >
+          <span class="text-6xl" aria-hidden="true">{errorIcon}</span>
+        </div>
+        <h1 class="font-display text-3xl font-bold text-foreground">
+          {error.title}
+        </h1>
+      </div>
+
+      <!-- Error details card -->
+      <div class="backdrop-blur-xl bg-card/80 rounded-3xl shadow-float p-8 border border-border/50 space-y-6">
+        <!-- Description -->
+        <div class="space-y-4 text-center">
+          <p class="text-lg text-muted-foreground leading-relaxed">
+            {error.description}
+          </p>
+
+          {
+            error.suggestion && (
+              <div class="bg-muted/50 rounded-2xl p-5 border border-border/30 text-left">
+                <p class="text-sm font-semibold text-foreground mb-2">Co możesz zrobić?</p>
+                <p class="text-sm text-muted-foreground leading-relaxed">{error.suggestion}</p>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Error code (for debugging) -->
+        <div class="pt-4 border-t border-border/30">
+          <p class="text-xs text-center text-muted-foreground font-mono">
+            Kod błędu: <span class="font-semibold">{errorCode}</span>
+          </p>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="space-y-3 pt-2">
+          <a href="/auth/login" class="block">
+            <Button className="w-full h-12 font-semibold shadow-card hover:shadow-float transition-all">
+              Przejdź do logowania
+            </Button>
+          </a>
+
+          <a href="/" class="block">
+            <Button variant="outline" className="w-full h-12 font-semibold"> Wróć na stronę główną </Button>
+          </a>
+        </div>
+      </div>
+
+      <!-- Help section -->
+      <div class="backdrop-blur-xl bg-card/60 rounded-2xl p-6 border border-border/30 text-center space-y-3">
+        <p class="text-sm font-semibold text-foreground">Nadal masz problemy?</p>
+        <p class="text-sm text-muted-foreground leading-relaxed">
+          Skontaktuj się z nami pod adresem{" "}
+          <a
+            href="mailto:admin@yogafit.pl"
+            class="text-primary hover:text-primary/80 font-medium underline decoration-primary/30 hover:decoration-primary transition-colors"
+          >
+            admin@yogafit.pl
+          </a>
+          {" "}i opisz napotkany problem.
+        </p>
+      </div>
+    </div>
+  </main>
+</Layout>

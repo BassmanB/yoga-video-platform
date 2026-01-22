@@ -60,35 +60,25 @@ export function useAuth(): UseAuthResult {
   const role: UserRole | null = user?.user_metadata?.role || "free";
 
   /**
-   * Sign in with magic link
+   * Sign in - redirects to login page
    */
-  const signIn = async () => {
-    if (!checkEnvVariables()) {
-      alert(
-        "⚠️ Supabase nie jest skonfigurowany. Zobacz ENV_SETUP.md aby dowiedzieć się jak skonfigurować zmienne środowiskowe."
-      );
-      return;
-    }
-
-    const email = prompt("Podaj swój email:");
-    if (!email) return;
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-    });
-
-    if (error) {
-      console.error("Error signing in:", error);
-      alert("Błąd podczas logowania. Spróbuj ponownie.");
-    } else {
-      alert("Sprawdź swoją skrzynkę email!");
-    }
+  const signIn = () => {
+    // Get current path for redirect after login
+    const currentPath = window.location.pathname;
+    const redirectParam = currentPath !== "/" ? `?redirect=${encodeURIComponent(currentPath)}` : "";
+    
+    // Redirect to login page
+    window.location.href = `/auth/login${redirectParam}`;
   };
 
   /**
    * Sign out current user
    */
   const signOut = async () => {
+    if (!checkEnvVariables()) {
+      return;
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error("Error signing out:", error);

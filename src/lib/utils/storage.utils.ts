@@ -30,9 +30,7 @@ export function getThumbnailUrl(path: string, supabase: SupabaseClient<Database>
   const cleanPath = path.startsWith("/") ? path.slice(1) : path;
 
   // Remove bucket name if it's already in the path
-  const pathWithoutBucket = cleanPath.startsWith("thumbnails/")
-    ? cleanPath.slice("thumbnails/".length)
-    : cleanPath;
+  const pathWithoutBucket = cleanPath.startsWith("thumbnails/") ? cleanPath.slice("thumbnails/".length) : cleanPath;
 
   const { data } = supabase.storage.from("thumbnails").getPublicUrl(pathWithoutBucket);
 
