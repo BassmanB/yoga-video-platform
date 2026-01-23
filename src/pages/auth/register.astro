@@ -1,15 +1,16 @@
 ---
 /**
- * Login page
+ * Register page
  *
- * Authentication page for existing users to request magic link
+ * Registration page for new users (invite-only)
  * - Server-side: Check if already logged in (redirect to home)
- * - Client-side: LoginForm with magic link request
- * - Info section for new users about invite-only registration
+ * - Client-side: RegisterForm with email confirmation
+ * - Info section about email confirmation process
+ * - Note: After registration, Supabase sends confirmation email
  */
 
 import Layout from "@/layouts/Layout.astro";
-import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 
 // Server-side auth check - redirect if already logged in
@@ -24,7 +25,7 @@ if (user) {
 const redirectTo = Astro.url.searchParams.get("redirect") || "/";
 ---
 
-<Layout title="Zaloguj się - YogaFit">
+<Layout title="Zarejestruj się - YogaFit">
   <main class="min-h-screen flex items-center justify-center bg-gradient-yoga p-4">
     <div class="max-w-md w-full space-y-8">
       <!-- Header -->
@@ -35,14 +36,14 @@ const redirectTo = Astro.url.searchParams.get("redirect") || "/";
         <h1
           class="font-display text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary text-transparent bg-clip-text"
         >
-          Zaloguj się
+          Zarejestruj się
         </h1>
-        <p class="text-lg text-muted-foreground font-body">Wyślemy Ci link logowania na email</p>
+        <p class="text-lg text-muted-foreground font-body">Utwórz konto i zacznij swoją praktykę</p>
       </div>
 
-      <!-- Login Form Card -->
+      <!-- Register Form Card -->
       <div class="backdrop-blur-xl bg-card/80 rounded-3xl shadow-float p-8 border border-border/50 space-y-6">
-        <LoginForm client:load redirectTo={redirectTo} />
+        <RegisterForm client:load redirectTo={redirectTo} />
 
         <!-- Divider -->
         <div class="relative">
@@ -58,14 +59,28 @@ const redirectTo = Astro.url.searchParams.get("redirect") || "/";
         <GoogleAuthButton client:load redirectTo={redirectTo} />
       </div>
 
-      <!-- Info for new users -->
+      <!-- Email confirmation info -->
+      <div class="backdrop-blur-xl bg-accent/10 rounded-2xl p-6 border border-accent/20 space-y-3">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl mt-0.5" aria-hidden="true">📧</span>
+          <div class="space-y-2">
+            <p class="text-sm font-semibold text-foreground">Potwierdzenie przez email</p>
+            <p class="text-sm text-muted-foreground leading-relaxed">
+              Po rejestracji wyślemy Ci email z linkiem aktywacyjnym. Kliknij w link, aby potwierdzić swoje konto i
+              rozpocząć korzystanie z platformy.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Already have account -->
       <div class="backdrop-blur-xl bg-card/60 rounded-2xl p-6 border border-border/30 text-center space-y-3">
-        <p class="text-sm font-semibold text-foreground">Nie masz jeszcze konta?</p>
+        <p class="text-sm font-semibold text-foreground">Masz już konto?</p>
         <a
-          href="/auth/register"
+          href="/auth/login"
           class="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium transition-colors group"
         >
-          Zarejestruj się
+          Zaloguj się
           <span class="group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
         </a>
       </div>

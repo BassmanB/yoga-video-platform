@@ -12,6 +12,21 @@ import { defineMiddleware } from "astro:middleware";
 
 import { createSupabaseServerClient } from "../db/supabase.client";
 
+// Public paths that don't require authentication
+const PUBLIC_PATHS = [
+  // Auth pages
+  "/auth/login",
+  "/auth/register",
+  "/auth/verify-email",
+  "/auth/callback",
+  "/auth/reset-password",
+  // Auth API endpoints
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/logout",
+  "/api/auth/callback",
+];
+
 export const onRequest = defineMiddleware(async (context, next) => {
   // Create Supabase client with request context (for session cookies)
   const supabase = createSupabaseServerClient({

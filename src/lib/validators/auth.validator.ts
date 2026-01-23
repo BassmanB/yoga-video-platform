@@ -27,6 +27,13 @@ export const loginSchema = emailSchema.extend({
 });
 
 /**
+ * Register form schema (email confirmation)
+ */
+export const registerSchema = emailSchema.extend({
+  redirectTo: z.string().url().optional(),
+});
+
+/**
  * OAuth redirect schema
  */
 export const oauthSchema = z.object({
@@ -48,5 +55,6 @@ export const callbackSchema = z.object({
 // Export types
 export type EmailInput = z.infer<typeof emailSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
 export type OAuthInput = z.infer<typeof oauthSchema>;
 export type CallbackParams = z.infer<typeof callbackSchema>;
