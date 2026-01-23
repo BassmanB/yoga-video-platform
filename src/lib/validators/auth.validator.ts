@@ -23,14 +23,14 @@ export const emailSchema = z.object({
  * Login form schema (magic link)
  */
 export const loginSchema = emailSchema.extend({
-  redirectTo: z.string().url().optional(),
+  redirectTo: z.string().optional(),
 });
 
 /**
  * Register form schema (email confirmation)
  */
 export const registerSchema = emailSchema.extend({
-  redirectTo: z.string().url().optional(),
+  redirectTo: z.string().optional(),
 });
 
 /**
@@ -40,7 +40,7 @@ export const oauthSchema = z.object({
   provider: z.enum(["google"], {
     errorMap: () => ({ message: "Nieobsługiwany provider" }),
   }),
-  redirectTo: z.string().url().optional(),
+  redirectTo: z.string().optional(),
 });
 
 /**

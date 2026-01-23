@@ -43,10 +43,24 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
     try {
       setServerError(null);
 
+      // Debug logging
+      // eslint-disable-next-line no-console
+      console.log("=== Login Form Debug ===");
+      // eslint-disable-next-line no-console
+      console.log("1. Form data:", data);
+      // eslint-disable-next-line no-console
+      console.log("2. supabaseClient exists:", !!supabaseClient);
+      // eslint-disable-next-line no-console
+      console.log("3. supabaseClient.auth exists:", !!supabaseClient?.auth);
+      // eslint-disable-next-line no-console
+      console.log("4. Callback URL:", `${window.location.origin}/auth/callback`);
+
       // Show loading toast
       const loadingToast = toast.loading("Wysyłanie linku logowania...");
 
       // Call Supabase Auth to send magic link
+      // eslint-disable-next-line no-console
+      console.log("5. Calling signInWithOtp...");
       const { error } = await supabaseClient.auth.signInWithOtp({
         email: data.email,
         options: {
@@ -54,6 +68,9 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
+
+      // eslint-disable-next-line no-console
+      console.log("6. Response error:", error);
 
       // Dismiss loading toast
       toast.dismiss(loadingToast);
