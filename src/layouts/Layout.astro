@@ -1,12 +1,17 @@
 ---
 import "../styles/global.css";
 import { Toaster } from "../components/ui/sonner";
+import { UserMenu } from "../components/UserMenu";
 
 interface Props {
   title?: string;
 }
 
 const { title = "10x Astro Starter" } = Astro.props;
+
+// User state verification - extracted from middleware
+const user = Astro.locals.user;
+const userRole = Astro.locals.userRole;
 ---
 
 <!doctype html>
@@ -28,6 +33,11 @@ const { title = "10x Astro Starter" } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
+    <!-- User Menu - Fixed position in top-right corner -->
+    <div class="fixed top-4 right-4 z-50">
+      <UserMenu client:load />
+    </div>
+
     <slot />
     <Toaster client:load position="bottom-right" />
   </body>

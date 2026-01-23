@@ -91,11 +91,9 @@ import Layout from "@/layouts/Layout.astro";
 
   <!-- Auto-redirect script (temporary until backend is implemented) -->
   <script is:inline>
+    /* Placeholder: Auto-redirect after 2 seconds */ /* TODO: Remove when backend callback is implemented */
     setTimeout(function () {
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get("redirect") || "/";
-      console.log("Callback placeholder - would redirect to:", redirect);
-      // window.location.href = redirect;
+      // Placeholder function
     }, 2000);
   </script>
 </Layout>

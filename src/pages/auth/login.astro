@@ -12,12 +12,13 @@ import Layout from "@/layouts/Layout.astro";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 
-// TODO: Add server-side auth check when implementing backend
-// const supabase = Astro.locals.supabase;
-// const { data: { session } } = await supabase.auth.getSession();
-// if (session) {
-//   return Astro.redirect("/");
-// }
+// Server-side auth check - redirect if already logged in
+const user = Astro.locals.user;
+
+if (user) {
+  // User is already logged in - redirect to home
+  return Astro.redirect("/");
+}
 
 // Get redirect URL from query params
 const redirectTo = Astro.url.searchParams.get("redirect") || "/";

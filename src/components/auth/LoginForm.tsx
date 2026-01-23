@@ -11,8 +11,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { loginSchema, type LoginInput } from "@/lib/validators/auth.validator";
+import { supabaseClient } from "@/db/supabase.client";
 import { Loader2 } from "lucide-react";
 
 interface LoginFormProps {
@@ -41,17 +43,53 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
     try {
       setServerError(null);
 
-      // TODO: Replace with actual Supabase signInWithOtp call
-      // This is a placeholder for UI implementation
-      console.log("Login form submitted:", data);
+      // Show loading toast
+      const loadingToast = toast.loading("Wysyłanie linku logowania...");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Call Supabase Auth to send magic link
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email: data.email,
+        options: {
+          // Email redirect URL - where user lands after clicking magic link
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+
+      if (error) {
+        // Handle Supabase errors
+        // eslint-disable-next-line no-console
+        console.error("Supabase signInWithOtp error:", error);
+
+        // Map Supabase error codes to user-friendly messages
+        let errorMessage = "Wystąpił błąd podczas wysyłania linku logowania.";
+
+        if (error.message.includes("rate limit")) {
+          errorMessage = "Za dużo prób logowania. Spróbuj ponownie za kilka minut.";
+        } else if (error.message.includes("network")) {
+          errorMessage = "Brak połączenia z internetem. Sprawdź połączenie i spróbuj ponownie.";
+        }
+
+        // Show error toast
+        toast.error(errorMessage);
+        setServerError(errorMessage);
+        return;
+      }
+
+      // Success - show toast and redirect
+      // Note: We ALWAYS redirect to verify-email, even if email doesn't exist
+      // This prevents email enumeration attacks
+      toast.success("Link logowania został wysłany!");
 
       // Redirect to verify-email page
       navigateToVerifyEmail(data.email);
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Unexpected error in LoginForm:", error);
       const errorMessage = error instanceof Error ? error.message : "Wystąpił nieoczekiwany błąd";
+      toast.error(errorMessage);
       setServerError(errorMessage);
     }
   };
