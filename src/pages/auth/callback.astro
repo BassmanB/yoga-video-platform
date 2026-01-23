@@ -13,37 +13,107 @@ import Layout from "@/layouts/Layout.astro";
 const supabase = Astro.locals.supabase;
 const { searchParams } = Astro.url;
 
-// Extract parameters from URL
+// Extract parameters from URL - support multiple Supabase auth flows
 const token_hash = searchParams.get("token_hash");
+const token = searchParams.get("token"); // Old format
+const code = searchParams.get("code"); // PKCE flow
 const type = searchParams.get("type");
 const redirect = searchParams.get("redirect") || "/";
 
+// Log ALL parameters for debugging
 console.log("=== Auth Callback Debug ===");
-console.log("1. Token hash:", token_hash ? "present" : "missing");
-console.log("2. Type:", type);
-console.log("3. Redirect:", redirect);
+console.log("1. All URL params:", Object.fromEntries(searchParams.entries()));
+console.log("2. Token hash:", token_hash ? "present" : "missing");
+console.log("3. Token (old format):", token ? "present" : "missing");
+console.log("4. Code (PKCE flow):", code ? "present" : "missing");
+console.log("5. Type:", type);
+console.log("6. Redirect:", redirect);
 
-// Validate required parameters
-if (!token_hash || !type) {
-  console.error("Missing token_hash or type parameter");
+// Check if we have PKCE code (most common for Supabase Cloud)
+if (code) {
+  console.log("7. Using PKCE flow - exchanging code for session");
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+  console.log("8. PKCE exchange response:", {
+    hasData: !!data,
+    hasSession: !!data?.session,
+    hasUser: !!data?.user,
+    userId: data?.user?.id,
+    error: error?.message,
+  });
+
+  if (error) {
+    console.error("PKCE code exchange error:", error);
+    const errorMessage = error.message.toLowerCase().includes("expired") ? "expired_token" : "verification_failed";
+    return Astro.redirect(`/auth/error?message=${errorMessage}&details=${encodeURIComponent(error.message)}`);
+  }
+
+  if (!data?.session) {
+    console.error("No session created after PKCE exchange");
+    return Astro.redirect("/auth/error?message=no_session");
+  }
+
+  // Verify the session was actually set by checking again
+  console.log("9. Verifying session was set...");
+  const {
+    data: { user: verifyUser },
+  } = await supabase.auth.getUser();
+  console.log("10. Session verification:", {
+    userExists: !!verifyUser,
+    userId: verifyUser?.id,
+    email: verifyUser?.email,
+  });
+
+  if (!verifyUser) {
+    console.error("Session was created but not persisted in cookies!");
+    return Astro.redirect("/auth/error?message=session_not_persisted");
+  }
+
+  console.log("11. PKCE Success! Redirecting to:", redirect);
+  return Astro.redirect(redirect);
+}
+
+// Check if we have token format (older flow)
+const hasToken = token_hash || token;
+
+// Validate required parameters for OTP flow
+if (!hasToken || !type) {
+  console.error("Missing authentication parameters. Received params:", Object.fromEntries(searchParams.entries()));
   return Astro.redirect("/auth/error?message=invalid_token");
 }
 
 // Validate token type
-const validTypes = ["magiclink", "recovery", "invite", "signup"];
+const validTypes = ["magiclink", "recovery", "invite", "signup", "email"];
 if (!validTypes.includes(type)) {
   console.error("Invalid token type:", type);
   return Astro.redirect("/auth/error?message=invalid_token_type");
 }
 
-// Verify the OTP token
-console.log("4. Calling verifyOtp...");
-const { data, error } = await supabase.auth.verifyOtp({
-  token_hash,
-  type: type as "magiclink" | "recovery" | "invite" | "signup",
-});
+// OTP flow - Verify the token (older flow, less common)
+console.log("7. Using OTP flow - verifying token");
+let data, error;
 
-console.log("5. Verification response:", {
+if (token_hash) {
+  // New format: use token_hash
+  console.log("8. Using token_hash format");
+  const result = await supabase.auth.verifyOtp({
+    token_hash,
+    type: type as "magiclink" | "recovery" | "invite" | "signup" | "email",
+  });
+  data = result.data;
+  error = result.error;
+} else if (token) {
+  // Old format: use token
+  console.log("8. Using token format (old)");
+  const result = await supabase.auth.verifyOtp({
+    token_hash: token,
+    type: type as "magiclink" | "recovery" | "invite" | "signup" | "email",
+  });
+  data = result.data;
+  error = result.error;
+}
+
+console.log("9. OTP verification response:", {
   hasData: !!data,
   hasSession: !!data?.session,
   hasUser: !!data?.user,
@@ -52,19 +122,19 @@ console.log("5. Verification response:", {
 
 // Handle verification errors
 if (error) {
-  console.error("Auth callback error:", error);
+  console.error("OTP verification error:", error);
   const errorMessage = error.message.toLowerCase().includes("expired") ? "expired_token" : "verification_failed";
   return Astro.redirect(`/auth/error?message=${errorMessage}&details=${encodeURIComponent(error.message)}`);
 }
 
 // Check if session was created
-if (!data.session) {
-  console.error("No session created after verification");
+if (!data?.session) {
+  console.error("No session created after OTP verification");
   return Astro.redirect("/auth/error?message=no_session");
 }
 
 // Success! Session is automatically set via cookies by the Supabase client
-console.log("6. Success! Redirecting to:", redirect);
+console.log("10. OTP Success! Redirecting to:", redirect);
 return Astro.redirect(redirect);
 ---
 

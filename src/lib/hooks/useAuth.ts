@@ -5,18 +5,15 @@
  */
 
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import type { UserRole } from "../../types";
 import type { UseAuthResult } from "../types/view-models";
 import { checkEnvVariables } from "../utils/env-check";
+import { supabaseClient } from "../../db/supabase.client";
 
-// Create Supabase client for client-side auth
-// Fallback to empty strings if env vars are not set (will show error in console but won't crash)
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || "";
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use the shared Supabase client from supabase.client.ts
+// This ensures consistent session management across the app
+const supabase = supabaseClient;
 
 /**
  * Hook for managing authentication state
@@ -62,7 +59,7 @@ export function useAuth(): UseAuthResult {
   /**
    * Sign in - redirects to login page
    */
-  const signIn = () => {
+  const signIn = async () => {
     // Get current path for redirect after login
     const currentPath = window.location.pathname;
     const redirectParam = currentPath !== "/" ? `?redirect=${encodeURIComponent(currentPath)}` : "";
