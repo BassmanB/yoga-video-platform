@@ -1,143 +1,103 @@
 ---
 /**
- * Authentication Error page
+ * Auth Error page
  *
- * Displays user-friendly error messages for authentication failures
- * - Different messages based on error code
- * - Link back to login page
- * - Helpful suggestions for resolving issues
+ * Displays authentication errors in a user-friendly way
  */
 
 import Layout from "@/layouts/Layout.astro";
-import { Button } from "@/components/ui/button";
 
-// Get error code from query params
-const errorCode = Astro.url.searchParams.get("code") || "unknown";
+// Get error message from query params
+const message = Astro.url.searchParams.get("message") || "unknown_error";
 
-// Error message mappings
-const errorMessages: Record<string, { title: string; description: string; suggestion?: string }> = {
+// Map error codes to user-friendly messages
+const errorMessages: Record<string, { title: string; description: string }> = {
   invalid_token: {
     title: "Nieprawidłowy link",
-    description: "Link logowania jest nieprawidłowy lub wygasł.",
-    suggestion: "Spróbuj zalogować się ponownie, aby otrzymać nowy link.",
+    description: "Link logowania jest nieprawidłowy lub wygasł. Spróbuj ponownie.",
+  },
+  invalid_token_type: {
+    title: "Nieprawidłowy typ tokenu",
+    description: "Ten link nie jest prawidłowym linkiem logowania.",
+  },
+  no_session: {
+    title: "Nie udało się zalogować",
+    description: "Nie mogliśmy utworzyć sesji. Spróbuj ponownie.",
   },
   verification_failed: {
     title: "Weryfikacja nie powiodła się",
-    description: "Nie udało się zweryfikować Twojego emaila.",
-    suggestion: "Link mógł wygasnąć. Linki logowania są ważne przez 60 minut.",
+    description: "Nie udało się zweryfikować linku. Być może wygasł lub został już użyty.",
   },
-  email_not_confirmed: {
-    title: "Email niepotwierdzony",
-    description: "Musisz najpierw potwierdzić swój adres email.",
-    suggestion: "Sprawdź swoją skrzynkę email i kliknij w link potwierdzający.",
+  expired_token: {
+    title: "Link wygasł",
+    description: "Ten link logowania już wygasł. Linki są ważne przez 60 minut.",
   },
-  access_denied: {
-    title: "Brak dostępu",
-    description: "Nie masz uprawnień do wykonania tej akcji.",
-    suggestion: "Skontaktuj się z administratorem, jeśli uważasz, że to błąd.",
-  },
-  session_expired: {
-    title: "Sesja wygasła",
-    description: "Twoja sesja wygasła z powodu braku aktywności.",
-    suggestion: "Zaloguj się ponownie, aby kontynuować.",
-  },
-  rate_limit_exceeded: {
-    title: "Za dużo prób",
-    description: "Przekroczono limit prób logowania.",
-    suggestion: "Poczekaj kilka minut i spróbuj ponownie.",
-  },
-  oauth_error: {
-    title: "Błąd logowania przez Google",
-    description: "Nie udało się zalogować przez konto Google.",
-    suggestion: "Spróbuj użyć logowania przez email lub spróbuj ponownie później.",
-  },
-  unknown: {
+  unknown_error: {
     title: "Wystąpił błąd",
-    description: "Coś poszło nie tak podczas logowania.",
-    suggestion: "Spróbuj ponownie później lub skontaktuj się z pomocą techniczną.",
+    description: "Coś poszło nie tak podczas logowania. Spróbuj ponownie.",
   },
 };
 
-const error = errorMessages[errorCode] || errorMessages.unknown;
+// Get error details or use default
+const errorDetail = errorMessages[message] || errorMessages.unknown_error;
 
-// Determine icon based on error type
-const getErrorIcon = (code: string) => {
-  if (code === "access_denied") return "🚫";
-  if (code === "rate_limit_exceeded") return "⏱️";
-  if (code === "session_expired") return "⌛";
-  return "⚠️";
-};
-
-const errorIcon = getErrorIcon(errorCode);
+// If message is not a known code, it might be a custom error message from Supabase
+const isCustomMessage = !errorMessages[message];
+const customMessage = isCustomMessage ? decodeURIComponent(message) : null;
 ---
 
-<Layout title={`${error.title} - YogaFit`}>
+<Layout title="Błąd logowania - YogaFit">
   <main class="min-h-screen flex items-center justify-center bg-gradient-yoga p-4">
     <div class="max-w-md w-full space-y-8">
-      <!-- Error icon and header -->
-      <div class="text-center space-y-4">
+      <!-- Error Icon -->
+      <div class="text-center space-y-6">
         <div
-          class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-50 dark:bg-red-950/20 border-2 border-red-200 dark:border-red-900"
+          class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-50 dark:bg-red-950/20 border-2 border-red-200 dark:border-red-800"
         >
-          <span class="text-6xl" aria-hidden="true">{errorIcon}</span>
+          <span class="text-6xl" aria-hidden="true">⚠️</span>
         </div>
-        <h1 class="font-display text-3xl font-bold text-foreground">
-          {error.title}
-        </h1>
-      </div>
 
-      <!-- Error details card -->
-      <div class="backdrop-blur-xl bg-card/80 rounded-3xl shadow-float p-8 border border-border/50 space-y-6">
-        <!-- Description -->
-        <div class="space-y-4 text-center">
-          <p class="text-lg text-muted-foreground leading-relaxed">
-            {error.description}
+        <div class="space-y-3">
+          <h1 class="font-display text-3xl font-bold text-foreground">
+            {errorDetail.title}
+          </h1>
+          <p class="text-lg text-muted-foreground font-body">
+            {errorDetail.description}
           </p>
 
           {
-            error.suggestion && (
-              <div class="bg-muted/50 rounded-2xl p-5 border border-border/30 text-left">
-                <p class="text-sm font-semibold text-foreground mb-2">Co możesz zrobić?</p>
-                <p class="text-sm text-muted-foreground leading-relaxed">{error.suggestion}</p>
+            customMessage && (
+              <div class="backdrop-blur-xl bg-card/60 rounded-2xl p-4 border border-border/30">
+                <p class="text-sm text-muted-foreground font-mono break-all">{customMessage}</p>
               </div>
             )
           }
         </div>
 
-        <!-- Error code (for debugging) -->
-        <div class="pt-4 border-t border-border/30">
-          <p class="text-xs text-center text-muted-foreground font-mono">
-            Kod błędu: <span class="font-semibold">{errorCode}</span>
+        <!-- Action buttons -->
+        <div class="backdrop-blur-xl bg-card/80 rounded-3xl shadow-float p-8 border border-border/50 space-y-4">
+          <a
+            href="/auth/login"
+            class="block w-full px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors text-center"
+          >
+            Spróbuj ponownie
+          </a>
+
+          <a
+            href="/"
+            class="block w-full px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:bg-secondary/90 transition-colors text-center"
+          >
+            Wróć na stronę główną
+          </a>
+        </div>
+
+        <!-- Help note -->
+        <div class="backdrop-blur-xl bg-card/60 rounded-2xl p-5 border border-border/30">
+          <p class="text-xs text-muted-foreground text-center leading-relaxed">
+            <strong class="text-foreground">Potrzebujesz pomocy?</strong><br />
+            Jeśli problem będzie się powtarzał, skontaktuj się z nami.
           </p>
         </div>
-
-        <!-- Action buttons -->
-        <div class="space-y-3 pt-2">
-          <a href="/auth/login" class="block">
-            <Button className="w-full h-12 font-semibold shadow-card hover:shadow-float transition-all">
-              Przejdź do logowania
-            </Button>
-          </a>
-
-          <a href="/" class="block">
-            <Button variant="outline" className="w-full h-12 font-semibold"> Wróć na stronę główną </Button>
-          </a>
-        </div>
-      </div>
-
-      <!-- Help section -->
-      <div class="backdrop-blur-xl bg-card/60 rounded-2xl p-6 border border-border/30 text-center space-y-3">
-        <p class="text-sm font-semibold text-foreground">Nadal masz problemy?</p>
-        <p class="text-sm text-muted-foreground leading-relaxed">
-          Skontaktuj się z nami pod adresem{" "}
-          <a
-            href="mailto:admin@yogafit.pl"
-            class="text-primary hover:text-primary/80 font-medium underline decoration-primary/30 hover:decoration-primary transition-colors"
-          >
-            admin@yogafit.pl
-          </a>
-          {" "}i opisz napotkany problem.
-        </p>
       </div>
     </div>
   </main>

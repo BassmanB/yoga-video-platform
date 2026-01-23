@@ -66,7 +66,7 @@ export function useAuth(): UseAuthResult {
     // Get current path for redirect after login
     const currentPath = window.location.pathname;
     const redirectParam = currentPath !== "/" ? `?redirect=${encodeURIComponent(currentPath)}` : "";
-    
+
     // Redirect to login page
     window.location.href = `/auth/login${redirectParam}`;
   };
