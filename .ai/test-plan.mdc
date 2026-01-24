@@ -1,51 +1,1298 @@
 ---
-description: 
+description: Kompleksowy plan testów dla Platformy do Udostępniania Nagrań Ćwiczeń Fizycznych
 globs: 
 alwaysApply: false
 ---
-Jesteś doświadczonym inżynierem QA, którego zadaniem jest stworzenie kompleksowego planu testów dla projektu programistycznego. Przeanalizuj poniższe informacje o projekcie:
 
-<kod_projektu>
+# Plan Testów - Platforma do Udostępniania Nagrań Ćwiczeń Fizycznych
 
-</kod_projektu>
+**Wersja:** 1.0  
+**Data:** 24 stycznia 2026  
+**Status:** Gotowy do Realizacji  
+**Projekt:** Yoga Video Platform MVP  
 
-<stos_technologiczny>
-[tech-stack.md](mdc:.ai/tech-stack.md)
-</stos_technologiczny>
+---
 
-Twoim zadaniem jest wygenerowanie szczegółowego planu testów, który będzie dostosowany do specyfiki projektu, uwzględniając wykorzystywane technologie, strukturę kodu oraz kluczowe elementy repozytorium. Plan testów powinien być napisany w języku polskim.
+## 1. Wprowadzenie i Cele Testowania
 
-Przed stworzeniem planu testów, przeprowadź dogłębną analizę projektu wewnątrz bloku <analiza_projektu> w swoim bloku myślowym. W analizie uwzględnij:
+### 1.1 Cel Dokumentu
 
-1. Kluczowe komponenty projektu wynikające z analizy kodu:
-   - Wymień i opisz główne komponenty projektu
-2. Specyfikę stosu technologicznego i jego wpływ na strategię testowania:
-   - Przeanalizuj każdy element stosu technologicznego i jego implikacje dla testowania
-3. Priorytety testowe bazujące na strukturze repozytorium:
-   - Zidentyfikuj i uszereguj obszary testowe według ważności
-4. Potencjalne obszary ryzyka wymagające szczególnej uwagi w testach:
-   - Wymień potencjalne ryzyka i uzasadnij, dlaczego wymagają specjalnej uwagi
+Niniejszy dokument określa kompleksową strategię testowania dla platformy do udostępniania nagrań wideo z ćwiczeniami fizycznymi (yoga, mobilność, kalistenika). Plan obejmuje wszystkie aspekty testowania dla MVP/POC, uwzględniając ograniczenia czasowe (3 tygodnie development) oraz małą grupę docelową (~20 użytkowników).
 
-Po zakończeniu analizy, stwórz plan testów wewnątrz bloku <plan_testów>. Plan powinien zawierać:
+### 1.2 Cele Testowania
 
-1. Wprowadzenie i cele testowania
-2. Zakres testów
-3. Typy testów do przeprowadzenia (np. testy jednostkowe, integracyjne, wydajnościowe)
-4. Scenariusze testowe dla kluczowych funkcjonalności
-5. Środowisko testowe
-6. Narzędzia do testowania
-7. Harmonogram testów
-8. Kryteria akceptacji testów
-9. Role i odpowiedzialności w procesie testowania
-10. Procedury raportowania błędów
+**Główne cele:**
+- ✅ Weryfikacja poprawności przepływów autentykacji (invite-only + magic link)
+- ✅ Zapewnienie prawidłowej kontroli dostępu do treści premium
+- ✅ Potwierdzenie stabilności odtwarzania wideo dla wszystkich ról użytkowników
+- ✅ Weryfikacja bezpieczeństwa (RLS policies, session management)
+- ✅ Sprawdzenie responsywności i dostępności UI
+- ✅ Identyfikacja błędów krytycznych przed wdrożeniem produkcyjnym
 
-Pamiętaj, aby plan testów był:
-- Dokładnie dostosowany do kontekstu projektu
-- Uwzględniał specyfikę wykorzystywanych technologii
-- Priorytetyzował kluczowe elementy repozytorium
-- Był napisany w języku polskim
-- Prezentował wysoką jakość i profesjonalizm
+**Kryteria sukcesu:**
+- Zero błędów krytycznych (blokujących użytkowanie)
+- Pokrycie testami wszystkich user stories z PRD
+- Wydajność: ładowanie strony < 3s, odtwarzanie wideo bez przerw
+- 100% scenariuszy autentykacji działa poprawnie
+- Kontrola dostępu działa zgodnie z rolami (free/premium/admin)
 
-Rozpocznij od analizy, a następnie przejdź do tworzenia planu testów. Twój końcowy wynik powinien składać się tylko z planu testów i nie powinien powielać ani streszczać żadnej pracy wykonanej w bloku analizy projektu.
+---
 
-Przedstaw ten plan w formacie Markdown.
+## 2. Zakres Testów
+
+### 2.1 Funkcjonalności w Zakresie
+
+**Moduł Autentykacji (Wysoki Priorytet):**
+- ✅ Invite Flow - zaproszenie nowych użytkowników przez admina
+- ✅ Magic Link Login - logowanie istniejących użytkowników
+- ✅ Google OAuth (opcjonalnie)
+- ✅ Session management i auto-refresh
+- ✅ Wylogowanie
+- ✅ Obsługa błędów autentykacji
+
+**Moduł Zarządzania Treścią Wideo (Wysoki Priorytet):**
+- ✅ Przeglądanie listy nagrań (strona główna)
+- ✅ Filtrowanie po kategorii (yoga/mobility/calisthenics)
+- ✅ Filtrowanie po poziomie (beginner/intermediate/advanced)
+- ✅ Filtrowanie po typie dostępu (free/premium)
+- ✅ Wyświetlanie szczegółów nagrania
+- ✅ Odtwarzanie wideo z kontrolkami (play/pause/volume/fullscreen)
+
+**Kontrola Dostępu (Krytyczny Priorytet):**
+- ✅ Premium Gate dla użytkowników free
+- ✅ Dostęp do premium content dla użytkowników premium/admin
+- ✅ RLS policies w Supabase
+- ✅ Redirect do logowania dla niezalogowanych przy premium content
+
+**API Endpoints (Średni Priorytet):**
+- ✅ GET /api/videos - lista nagrań z filtrowaniem
+- ✅ GET /api/videos/:id - szczegóły pojedynczego nagrania
+- ✅ GET /api/health - health check
+- ✅ POST /api/auth/logout - wylogowanie
+
+**UI/UX (Średni Priorytet):**
+- ✅ Responsywność (mobile, tablet, desktop)
+- ✅ Dark theme
+- ✅ Loading states (skeleton loaders)
+- ✅ Error states (user-friendly komunikaty)
+- ✅ Accessibility (keyboard navigation, screen readers)
+
+### 2.2 Funkcjonalności Poza Zakresem MVP
+
+**Nie testujemy w tej iteracji:**
+- ❌ Admin panel (zarządzanie wideo przez UI) - admin używa Supabase Dashboard
+- ❌ Upload wideo przez UI - admin uploaduje bezpośrednio do Supabase Storage
+- ❌ Płatności online - upgrade roli ręczny przez admina
+- ❌ User profile management - brak edycji profilu w MVP
+- ❌ Playlisty użytkowników
+- ❌ System komentarzy
+- ❌ Analytics i tracking użytkowników
+- ❌ Wyszukiwarka pełnotekstowa
+- ❌ Multi-language support (tylko polski)
+- ❌ Light theme (tylko dark)
+
+### 2.3 Ograniczenia Zakres Testów
+
+**Środowisko:**
+- Testowanie na przeglądarkach: Chrome, Firefox, Safari (mobile)
+- Urządzenia: Desktop (1920x1080), Tablet (768x1024), Mobile (375x812)
+- System operacyjny: Windows 10+, macOS, iOS, Android
+
+**Dane testowe:**
+- 3-4 testowe nagrania wideo (~2 min każde)
+- ~5 użytkowników testowych (2 free, 2 premium, 1 admin)
+- Testowy projekt Supabase
+
+---
+
+## 3. Typy Testów do Przeprowadzenia
+
+### 3.1 Testy Funkcjonalne (Manual Testing)
+
+**Priorytet:** Wysoki  
+**Odpowiedzialność:** Developer/QA  
+**Częstotliwość:** Przed każdym deploymentem
+
+**Obszary:**
+- Wszystkie user stories z PRD
+- Wszystkie przepływy autentykacji
+- Wszystkie scenariusze kontroli dostępu
+- CRUD operations na wideo (przez API)
+- Obsługa błędów (wszystkie edge cases)
+
+**Narzędzia:**
+- Browser DevTools
+- Supabase Dashboard (weryfikacja RLS, auth events)
+- Manual test checklist (Excel/Notion)
+
+### 3.2 Testy Integracyjne (API Testing)
+
+**Priorytet:** Wysoki  
+**Odpowiedzialność:** Developer  
+**Częstotliwość:** Po każdej zmianie w API
+
+**Obszary:**
+- Integracja Astro API routes z Supabase
+- Session management w middleware
+- RLS policies enforcement
+- Storage URL generation (signed URLs dla premium)
+
+**Narzędzia:**
+- Postman/Insomnia (kolekcja requestów)
+- Supabase Client JS (testy w console)
+- Browser Network tab
+
+### 3.3 Testy Bezpieczeństwa (Security Testing)
+
+**Priorytet:** Krytyczny  
+**Odpowiedzialność:** Developer  
+**Częstotliwość:** Przed wdrożeniem produkcyjnym
+
+**Obszary:**
+- RLS policies - próba dostępu do premium content bez uprawnień
+- Session hijacking - próba użycia cudzego tokenu
+- CSRF protection - weryfikacja SameSite cookies
+- XSS prevention - test injection w opisach wideo
+- SQL injection - test injection w API params (mimo że Supabase chroni)
+- Email enumeration - weryfikacja jednolitych komunikatów
+
+**Checklist:**
+- [ ] HttpOnly cookies ustawione
+- [ ] HTTPS only w production
+- [ ] RLS enabled na wszystkich tabelach
+- [ ] Rate limiting na resend email
+- [ ] Input validation (Zod schemas)
+- [ ] Error messages nie ujawniają danych wrażliwych
+
+### 3.4 Testy Wydajnościowe (Performance Testing)
+
+**Priorytet:** Średni  
+**Odpowiedzialność:** Developer  
+**Częstotliwość:** Przed wdrożeniem produkcyjnym
+
+**Metryki:**
+- ⏱️ Ładowanie strony głównej < 3s (LCP)
+- ⏱️ First Contentful Paint < 1.5s
+- ⏱️ Time to Interactive < 3.5s
+- ⏱️ API response time < 500ms (95th percentile)
+- ⏱️ Video playback start < 2s
+- 📦 Bundle size < 500KB (initial load)
+
+**Narzędzia:**
+- Lighthouse (Chrome DevTools)
+- WebPageTest.org
+- Supabase Dashboard (query performance)
+
+### 3.5 Testy Responsywności (Responsive Testing)
+
+**Priorytet:** Wysoki  
+**Odpowiedzialność:** Developer/QA  
+**Częstotliwość:** Po każdej zmianie UI
+
+**Breakpoints:**
+- 📱 Mobile: 375px, 414px (iPhone)
+- 📱 Tablet: 768px, 1024px (iPad)
+- 🖥️ Desktop: 1280px, 1920px
+
+**Testy:**
+- Layout nie pęka na żadnym breakpoincie
+- Touch targets min 44x44px (mobile)
+- Text readable bez zoom (min 16px)
+- Video player działa na wszystkich urządzeniach
+- Navbar collapse na mobile
+
+**Narzędzia:**
+- Chrome DevTools (device emulation)
+- BrowserStack (real devices - opcjonalnie)
+- Responsive design mode (Firefox)
+
+### 3.6 Testy Dostępności (Accessibility Testing)
+
+**Priorytet:** Średni  
+**Odpowiedzialność:** Developer  
+**Częstotliwość:** Przed wdrożeniem produkcyjnym
+
+**Standardy:** WCAG 2.1 Level AA (minimum)
+
+**Obszary:**
+- ⌨️ Keyboard navigation (Tab, Enter, Escape)
+- 🔊 Screen reader compatibility (NVDA/VoiceOver)
+- 🎨 Contrast ratio > 4.5:1 (text), > 3:1 (UI components)
+- 🏷️ Alt text dla obrazów
+- 📄 Semantic HTML (headings, landmarks)
+- ♿ ARIA labels gdzie potrzebne
+
+**Narzędzia:**
+- axe DevTools (Chrome extension)
+- Lighthouse accessibility audit
+- NVDA/VoiceOver (manual testing)
+
+### 3.7 Testy Regresji (Regression Testing)
+
+**Priorytet:** Średni  
+**Odpowiedzialność:** QA  
+**Częstotliwość:** Przed każdym wdrożeniem
+
+**Zakres:**
+- Smoke tests (critical paths)
+- Poprzednie bug fixes (re-testing)
+- Kluczowe user flows
+
+**Checklist skrócony (smoke tests):**
+- [ ] Strona główna ładuje się poprawnie
+- [ ] Lista nagrań wyświetla się
+- [ ] Filtrowanie działa
+- [ ] Logowanie przez magic link działa
+- [ ] Premium gate wyświetla się dla free users
+- [ ] Video playback działa dla uprawnionego użytkownika
+
+---
+
+## 4. Scenariusze Testowe dla Kluczowych Funkcjonalności
+
+### 4.1 Moduł Autentykacji
+
+#### TC-AUTH-001: Invite Flow - Nowy Użytkownik
+
+**Priorytet:** Krytyczny  
+**User Story:** US-05
+
+**Warunki początkowe:**
+- Admin ma dostęp do Supabase Dashboard
+- Email użytkownika nie istnieje w systemie
+
+**Kroki:**
+1. Admin loguje się do Supabase Dashboard
+2. Nawigacja: Authentication → Users → Invite user
+3. Wypełnienie formularza:
+   - Email: `testuser@example.com`
+   - User Metadata: `{"role": "premium", "display_name": "Test User"}`
+4. Kliknięcie "Invite user"
+5. Użytkownik otwiera email "Invite User Email"
+6. Kliknięcie linku w emailu
+7. Redirect do `/auth/callback?token_hash=...&type=invite`
+
+**Oczekiwany rezultat:**
+- ✅ Email wysłany w < 5s
+- ✅ Link w emailu jest aktywny
+- ✅ Po kliknięciu linku - konto utworzone automatycznie
+- ✅ Auto-login (session ustawiona)
+- ✅ Redirect do `/` (strona główna)
+- ✅ Navbar wyświetla avatar + rolę "premium"
+- ✅ Użytkownik ma dostęp do premium content
+
+**Test Data:**
+```json
+{
+  "email": "testuser@example.com",
+  "role": "premium",
+  "display_name": "Test User"
+}
+```
+
+---
+
+#### TC-AUTH-002: Magic Link Login - Istniejący Użytkownik
+
+**Priorytet:** Krytyczny  
+**User Story:** US-06
+
+**Warunki początkowe:**
+- Użytkownik ma już konto w systemie
+- Użytkownik nie jest zalogowany
+
+**Kroki:**
+1. Nawigacja do `/auth/login`
+2. Wypełnienie formularza email: `existinguser@example.com`
+3. Kliknięcie "Wyślij link"
+4. Redirect do `/auth/verify-email?email=existinguser@example.com`
+5. Użytkownik otwiera email "Magic Link Email"
+6. Kliknięcie linku w emailu
+7. Redirect do `/auth/callback?token_hash=...&type=magiclink`
+
+**Oczekiwany rezultat:**
+- ✅ Email wysłany w < 5s
+- ✅ Strona verify-email wyświetla komunikat "Sprawdź swoją skrzynkę"
+- ✅ Po kliknięciu linku - auto-login
+- ✅ Redirect do `/` (lub original `redirect` param)
+- ✅ Navbar wyświetla avatar + rolę użytkownika
+- ✅ Session aktywna
+
+---
+
+#### TC-AUTH-003: Magic Link - Email Nie Istnieje (Security)
+
+**Priorytet:** Wysoki  
+**Security Test:** Email Enumeration Prevention
+
+**Warunki początkowe:**
+- Email `nonexistent@example.com` nie istnieje w systemie
+
+**Kroki:**
+1. Nawigacja do `/auth/login`
+2. Wypełnienie formularza email: `nonexistent@example.com`
+3. Kliknięcie "Wyślij link"
+
+**Oczekiwany rezultat:**
+- ✅ **Jednolity komunikat sukcesu**: "Link wysłany na podany adres email"
+- ✅ Redirect do `/auth/verify-email` (identyczny jak dla existing user)
+- ✅ W rzeczywistości: email NIE został wysłany (Supabase silent fail)
+- ✅ Użytkownik nie może stwierdzić czy email istnieje w systemie
+
+**Security Note:** Zapobiega Email Enumeration Attack
+
+---
+
+#### TC-AUTH-004: Session Refresh - Auto Odnowienie
+
+**Priorytet:** Średni  
+**User Story:** FR-11
+
+**Warunki początkowe:**
+- Użytkownik zalogowany
+- Session wygasa za < 5 min
+
+**Kroki:**
+1. Użytkownik jest zalogowany
+2. Czekaj 55 minut (access token expiry = 1h)
+3. Użytkownik wraca na kartę (visibility change event)
+
+**Oczekiwany rezultat:**
+- ✅ `useAuth` hook wykrywa zbliżające się wygaśnięcie
+- ✅ Automatyczny refresh session (silent)
+- ✅ Nowy access token uzyskany
+- ✅ Użytkownik pozostaje zalogowany (bez przerwania)
+- ✅ Brak redirectu do `/auth/login`
+
+---
+
+#### TC-AUTH-005: Wylogowanie
+
+**Priorytet:** Wysoki  
+**User Story:** US-07
+
+**Warunki początkowe:**
+- Użytkownik zalogowany
+
+**Kroki:**
+1. Kliknięcie avatara w navbar
+2. Dropdown menu → "Wyloguj się"
+3. Potwierdzenie akcji
+
+**Oczekiwany rezultat:**
+- ✅ Session cleared (cookies usunięte)
+- ✅ Auth state updated → navbar pokazuje "Zaloguj się"
+- ✅ Toast notification: "Wylogowano pomyślnie"
+- ✅ Użytkownik pozostaje na tej samej stronie
+- ✅ Premium content nie jest już dostępny
+
+---
+
+### 4.2 Kontrola Dostępu
+
+#### TC-ACCESS-001: Free User - Próba Dostępu do Premium Content
+
+**Priorytet:** Krytyczny  
+**User Story:** US-08, US-09
+
+**Warunki początkowe:**
+- Użytkownik zalogowany z rolą "free"
+- Istnieje nagranie premium (is_premium = true)
+
+**Kroki:**
+1. Użytkownik nawiguje do premium video: `/video/{premium-id}`
+2. Strona ładuje się
+
+**Oczekiwany rezultat:**
+- ✅ Strona się ładuje (200 OK, nie 403)
+- ✅ Komponent `<PremiumGate />` wyświetlony
+- ✅ Komunikat: "Ta treść jest dostępna tylko dla użytkowników premium"
+- ✅ Kontaktowy email admina widoczny
+- ✅ Video player NIE jest renderowany
+- ✅ Thumbnail z badge "PREMIUM" wyświetlony
+
+---
+
+#### TC-ACCESS-002: Premium User - Dostęp do Premium Content
+
+**Priorytet:** Krytyczny  
+**User Story:** US-09
+
+**Warunki początkowe:**
+- Użytkownik zalogowany z rolą "premium"
+- Istnieje nagranie premium (is_premium = true)
+
+**Kroki:**
+1. Użytkownik nawiguje do premium video: `/video/{premium-id}`
+
+**Oczekiwany rezultat:**
+- ✅ Strona ładuje się (200 OK)
+- ✅ Video player wyświetlony i funkcjonalny
+- ✅ Video playback działa (signed URL vygenerowany)
+- ✅ Kontrolki odtwarzania działają (play/pause/volume/fullscreen)
+- ✅ Brak `<PremiumGate />`
+
+---
+
+#### TC-ACCESS-003: Niezalogowany - Redirect do Login
+
+**Priorytet:** Krytyczny  
+**User Story:** US-08
+
+**Warunki początkowe:**
+- Użytkownik NIE jest zalogowany
+- Istnieje nagranie premium (is_premium = true)
+
+**Kroki:**
+1. Użytkownik nawiguje bezpośrednio do: `/video/{premium-id}`
+
+**Oczekiwany rezultat:**
+- ✅ Redirect do `/auth/login?redirect=/video/{premium-id}` (302)
+- ✅ Strona logowania wyświetla się
+- ✅ Po zalogowaniu - automatyczny redirect do `/video/{premium-id}`
+
+---
+
+#### TC-ACCESS-004: Admin - Dostęp do Draft Videos
+
+**Priorytet:** Średni  
+**User Story:** US-14
+
+**Warunki początkowe:**
+- Użytkownik zalogowany z rolą "admin"
+- Istnieje nagranie ze statusem "draft"
+
+**Kroki:**
+1. Admin nawiguje do: `/video/{draft-id}`
+
+**Oczekiwany rezultat:**
+- ✅ Strona ładuje się (200 OK)
+- ✅ Video player wyświetlony
+- ✅ Badge "DRAFT" widoczny w VideoHeader
+- ✅ Video playback działa
+
+---
+
+### 4.3 Moduł Wideo - Przeglądanie i Odtwarzanie
+
+#### TC-VIDEO-001: Lista Nagrań - Strona Główna
+
+**Priorytet:** Krytyczny  
+**User Story:** US-01
+
+**Warunki początkowe:**
+- Baza zawiera 3-4 testowe nagrania (mix free/premium)
+
+**Kroki:**
+1. Nawigacja do `/` (strona główna)
+
+**Oczekiwany rezultat:**
+- ✅ Strona ładuje się w < 3s
+- ✅ VideoGrid wyświetla wszystkie published videos (free + premium)
+- ✅ Każda karta zawiera: thumbnail, tytuł, opis, duration, badge (free/premium)
+- ✅ Layout responsywny: 3 kolumny (desktop), 2 (tablet), 1 (mobile)
+- ✅ Skeleton loader wyświetlany podczas ładowania
+
+---
+
+#### TC-VIDEO-002: Filtrowanie po Kategorii
+
+**Priorytet:** Wysoki  
+**User Story:** US-02
+
+**Warunki początkowe:**
+- Lista nagrań wyświetla się
+
+**Kroki:**
+1. Kliknięcie dropdown "Kategoria"
+2. Wybór "Yoga"
+
+**Oczekiwany rezultat:**
+- ✅ URL updated: `/?category=yoga`
+- ✅ Tylko nagrania z kategorią "yoga" wyświetlone
+- ✅ Inne kategorie ukryte
+- ✅ Liczba wyników zaktualizowana
+- ✅ EmptyState jeśli brak wyników
+
+---
+
+#### TC-VIDEO-003: Filtrowanie po Poziomie
+
+**Priorytet:** Wysoki  
+**User Story:** US-02
+
+**Kroki:**
+1. Kliknięcie dropdown "Poziom"
+2. Wybór "Beginner"
+
+**Oczekiwany rezultat:**
+- ✅ URL updated: `/?level=beginner`
+- ✅ Tylko nagrania z poziomem "beginner" wyświetlone
+
+---
+
+#### TC-VIDEO-004: Filtrowanie po Typie (Free/Premium)
+
+**Priorytet:** Wysoki  
+**User Story:** US-02
+
+**Kroki:**
+1. Toggle "Tylko darmowe"
+
+**Oczekiwany rezultat:**
+- ✅ URL updated: `/?is_premium=false`
+- ✅ Tylko nagrania free wyświetlone
+- ✅ Premium badges ukryte
+
+---
+
+#### TC-VIDEO-005: Kombinacja Filtrów
+
+**Priorytet:** Średni
+
+**Kroki:**
+1. Wybór "Yoga" + "Beginner" + "Tylko darmowe"
+
+**Oczekiwany rezultat:**
+- ✅ URL: `/?category=yoga&level=beginner&is_premium=false`
+- ✅ Tylko nagrania spełniające wszystkie kryteria wyświetlone
+- ✅ EmptyState jeśli brak wyników
+
+---
+
+#### TC-VIDEO-006: Video Playback - Podstawowa Funkcjonalność
+
+**Priorytet:** Krytyczny  
+**User Story:** US-10
+
+**Warunki początkowe:**
+- Użytkownik ma dostęp do nagrania (premium user lub free video)
+
+**Kroki:**
+1. Nawigacja do `/video/{id}`
+2. Oczekiwanie na załadowanie video playera
+3. Kliknięcie play button
+
+**Oczekiwany rezultat:**
+- ✅ Video player renderuje się w < 2s
+- ✅ Thumbnail loading placeholder wyświetlony
+- ✅ Po kliknięciu play - odtwarzanie rozpoczyna się
+- ✅ Audio działa
+- ✅ Progress bar aktualizuje się
+- ✅ Brak błędów playback
+
+---
+
+#### TC-VIDEO-007: Video Player - Kontrolki
+
+**Priorytet:** Wysoki  
+**User Story:** US-10
+
+**Kroki:**
+1. Video player wyświetlony i odtwarzanie rozpoczęte
+2. Test kontrolek:
+   - Play/Pause
+   - Volume up/down
+   - Mute/unmute
+   - Fullscreen
+   - Speed control (0.5x, 1x, 1.5x, 2x)
+   - Seek (przewijanie)
+
+**Oczekiwany rezultat:**
+- ✅ Wszystkie kontrolki responsywne
+- ✅ Volume persists po refreshu (localStorage)
+- ✅ Fullscreen działa na wszystkich przeglądarkach
+- ✅ Speed control zmienia prędkość odtwarzania
+- ✅ Seek działa płynnie
+
+---
+
+#### TC-VIDEO-008: Video Details - Metadata
+
+**Priorytet:** Średni  
+**User Story:** US-03
+
+**Kroki:**
+1. Nawigacja do `/video/{id}`
+2. Przegląd sekcji VideoDetails
+
+**Oczekiwany rezultat:**
+- ✅ VideoHeader: tytuł, badges (category, level, premium/free)
+- ✅ VideoDescription: pełny opis (expandable jeśli długi)
+- ✅ Duration wyświetlony w formacie MM:SS
+- ✅ Created/Updated dates (opcjonalnie)
+
+---
+
+### 4.4 API Endpoints
+
+#### TC-API-001: GET /api/videos - Lista Nagrań
+
+**Priorytet:** Wysoki
+
+**Request:**
+```http
+GET /api/videos?category=yoga&limit=10
+```
+
+**Oczekiwany Response (200 OK):**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "title": "Morning Yoga Flow",
+      "category": "yoga",
+      "level": "beginner",
+      "duration": 900,
+      "is_premium": false,
+      "status": "published"
+    }
+  ],
+  "meta": {
+    "total": 42,
+    "limit": 10,
+    "offset": 0,
+    "count": 10
+  }
+}
+```
+
+**Test Cases:**
+- ✅ Bez filtrów - wszystkie published videos
+- ✅ Z filtrem category=yoga
+- ✅ Z filtrem level=beginner
+- ✅ Z filtrem is_premium=false
+- ✅ Invalid category → 400 Bad Request
+- ✅ RLS enforcement: free user nie widzi draft videos
+
+---
+
+#### TC-API-002: GET /api/videos/:id - Single Video
+
+**Priorytet:** Wysoki
+
+**Request:**
+```http
+GET /api/videos/{valid-uuid}
+Authorization: Bearer {token}
+```
+
+**Oczekiwany Response (200 OK):**
+```json
+{
+  "data": {
+    "id": "uuid",
+    "title": "Video Title",
+    "description": "Full description",
+    "video_url": "videos-free/file.mp4",
+    "thumbnail_url": "thumbnails/file.jpg"
+  }
+}
+```
+
+**Test Cases:**
+- ✅ Valid ID + authorized user → 200
+- ✅ Invalid UUID → 400 Bad Request
+- ✅ Non-existent ID → 404 Not Found
+- ✅ Premium video + free user → 404 (RLS policy blocks)
+- ✅ Premium video + premium user → 200
+
+---
+
+#### TC-API-003: GET /api/health - Health Check
+
+**Priorytet:** Niski
+
+**Request:**
+```http
+GET /api/health
+```
+
+**Oczekiwany Response (200 OK):**
+```json
+{
+  "status": "healthy",
+  "services": {
+    "api": "up",
+    "database": "up",
+    "storage": "up"
+  }
+}
+```
+
+---
+
+### 4.5 Obsługa Błędów
+
+#### TC-ERROR-001: Network Error - API Unavailable
+
+**Priorytet:** Średni
+
+**Symulacja:**
+- Wyłączenie internetu / Supabase down
+
+**Oczekiwany rezultat:**
+- ✅ VideoPlayerError komponent wyświetlony
+- ✅ Komunikat: "Błąd połączenia. Sprawdź połączenie z internetem."
+- ✅ Przycisk "Spróbuj ponownie"
+- ✅ Po kliknięciu - retry request
+
+---
+
+#### TC-ERROR-002: Video Playback Error - Corrupted File
+
+**Priorytet:** Średni
+
+**Symulacja:**
+- Video file uszkodzony / format nieobsługiwany
+
+**Oczekiwany rezultat:**
+- ✅ VideoPlayerError wyświetlony
+- ✅ Komunikat: "Błąd odtwarzania. Spróbuj ponownie później."
+- ✅ Przycisk "Powrót do strony głównej"
+
+---
+
+#### TC-ERROR-003: 404 - Video Not Found
+
+**Priorytet:** Wysoki
+
+**Symulacja:**
+- Nawigacja do `/video/{non-existent-id}`
+
+**Oczekiwany rezultat:**
+- ✅ VideoPlayerError wyświetlony
+- ✅ Komunikat: "Nie znaleziono nagrania"
+- ✅ Przycisk "Powrót do strony głównej"
+
+---
+
+#### TC-ERROR-004: Magic Link Expired
+
+**Priorytet:** Wysoki
+
+**Symulacja:**
+- Kliknięcie magic link po > 60 min
+
+**Oczekiwany rezultat:**
+- ✅ Redirect do `/auth/error?code=invalid_token`
+- ✅ Komunikat: "Link logowania wygasł lub jest nieprawidłowy"
+- ✅ Link "Przejdź do logowania"
+
+---
+
+## 5. Środowisko Testowe
+
+### 5.1 Konfiguracja Środowisk
+
+#### Development Environment
+- **URL:** `http://localhost:3000`
+- **Supabase:** Projekt testowy (development)
+- **Dane:** Seeded test data (3-4 videos)
+- **Users:** 5 test users (2 free, 2 premium, 1 admin)
+
+#### Staging/Production Environment
+- **URL:** `https://[domain]` (VPS OVH)
+- **Supabase:** Produkcyjny projekt
+- **Dane:** Realne nagrania
+- **Users:** Rzeczywisci użytkownicy (~20 osób)
+
+### 5.2 Test Data
+
+**Test Users:**
+```javascript
+const testUsers = [
+  { email: "free1@test.com", role: "free", password: "magiclink" },
+  { email: "free2@test.com", role: "free", password: "magiclink" },
+  { email: "premium1@test.com", role: "premium", password: "magiclink" },
+  { email: "premium2@test.com", role: "premium", password: "magiclink" },
+  { email: "admin@test.com", role: "admin", password: "magiclink" }
+];
+```
+
+**Test Videos:**
+```javascript
+const testVideos = [
+  { id: "uuid-1", title: "Morning Yoga", category: "yoga", level: "beginner", is_premium: false, duration: 120 },
+  { id: "uuid-2", title: "Advanced Mobility", category: "mobility", level: "advanced", is_premium: true, duration: 180 },
+  { id: "uuid-3", title: "Calisthenics Basics", category: "calisthenics", level: "beginner", is_premium: false, duration: 150 },
+  { id: "uuid-4", title: "Premium Yoga Flow", category: "yoga", level: "intermediate", is_premium: true, duration: 200 }
+];
+```
+
+### 5.3 Przeglądarki i Urządzenia
+
+**Przeglądarki:**
+- ✅ Chrome (latest) - Primary
+- ✅ Firefox (latest) - Secondary
+- ✅ Safari (iOS) - Mobile testing
+- ⚠️ Edge - Nice to have (Chromium-based, similar to Chrome)
+
+**Urządzenia:**
+- 🖥️ Desktop: 1920x1080, 1366x768
+- 📱 Tablet: iPad (1024x768)
+- 📱 Mobile: iPhone 12 (390x844), Android (360x800)
+
+---
+
+## 6. Narzędzia do Testowania
+
+### 6.1 Manual Testing Tools
+
+**Browser DevTools:**
+- Network tab - monitoring API requests
+- Console - JavaScript errors
+- Application tab - cookies, localStorage inspection
+- Performance tab - performance metrics
+
+**Supabase Dashboard:**
+- Authentication logs
+- Database queries (SQL Editor)
+- Storage file management
+- RLS policy testing
+
+**Postman/Insomnia:**
+- API testing (kolekcja requestów)
+- Environment variables
+- Pre-request scripts (auth token)
+
+### 6.2 Automated Testing Tools (Future)
+
+**Playwright (E2E Testing):**
+```typescript
+// Przykład testu E2E
+test('user can login with magic link', async ({ page }) => {
+  await page.goto('/auth/login');
+  await page.fill('input[type="email"]', 'test@example.com');
+  await page.click('button[type="submit"]');
+  await expect(page).toHaveURL(/\/auth\/verify-email/);
+});
+```
+
+**Vitest (Unit Testing):**
+```typescript
+// Przykład testu jednostkowego
+describe('useAuth hook', () => {
+  it('should initialize with null user', () => {
+    const { result } = renderHook(() => useAuth());
+    expect(result.current.user).toBeNull();
+  });
+});
+```
+
+**axe DevTools (Accessibility):**
+- Automated accessibility scanning
+- WCAG 2.1 compliance checks
+
+### 6.3 Performance Testing Tools
+
+**Lighthouse:**
+- Performance score
+- Accessibility score
+- Best practices
+- SEO score
+
+**WebPageTest:**
+- Detailed waterfall analysis
+- Real device testing
+- Video recording of load
+
+---
+
+## 7. Harmonogram Testów
+
+### 7.1 Timeline (3 tygodnie development)
+
+**Tydzień 1: Development + Unit Testing**
+- Dev implementuje funkcje
+- Continuous testing podczas development
+- Unit tests dla critical functions
+
+**Tydzień 2: Integration + Functional Testing**
+- API integration testing
+- Functional testing (manual)
+- Bug fixing cycle
+
+**Tydzień 3: Security + Performance + UAT**
+- Security testing (checklist)
+- Performance optimization
+- User Acceptance Testing (2-3 beta users)
+- Final bug fixes
+- Pre-production smoke tests
+
+### 7.2 Test Cycles
+
+**Daily (During Development):**
+- Smoke tests po każdym commitcie
+- Browser console errors check
+- Quick regression checks
+
+**Weekly:**
+- Pełny functional test pass
+- Cross-browser testing
+- Performance metrics review
+
+**Before Deployment:**
+- Complete regression suite
+- Security checklist verification
+- Production smoke tests (post-deploy)
+
+---
+
+## 8. Kryteria Akceptacji Testów
+
+### 8.1 Exit Criteria (Ready for Production)
+
+**Must Have (Blockers):**
+- ✅ Zero błędów krytycznych (severity: critical)
+- ✅ Wszystkie user stories z PRD przetestowane i działają
+- ✅ Autentykacja działa w 100% przypadków (invite + magic link)
+- ✅ Kontrola dostępu działa poprawnie (RLS policies)
+- ✅ Video playback bez błędów dla uprawnionego użytkownika
+- ✅ Security checklist 100% completed
+- ✅ Performance: Lighthouse score > 80 (desktop)
+- ✅ Responsywność na wszystkich breakpointach
+
+**Should Have (Nice to Have):**
+- ✅ Accessibility: WCAG 2.1 AA compliance > 90%
+- ✅ Performance: Lighthouse score > 90 (desktop)
+- ✅ Zero błędów wysokiego priorytetu (severity: high)
+- ✅ Cross-browser compatibility (Chrome, Firefox, Safari)
+
+**Could Have (Post-MVP):**
+- E2E automated tests coverage > 50%
+- Unit tests coverage > 70%
+- Perfromance: Mobile Lighthouse score > 70
+
+### 8.2 Bug Severity Levels
+
+**Critical (P0) - Blocker:**
+- Aplikacja nie startuje
+- Brak możliwości logowania (invite/magic link)
+- Brak dostępu do premium content dla premium users
+- Data breach / security vulnerability
+- **Action:** Fix immediately, block deployment
+
+**High (P1) - Major:**
+- Video nie odtwarza się
+- Filtrowanie nie działa
+- Session nie refreshuje się automatycznie
+- **Action:** Fix within 24h, deploy ASAP
+
+**Medium (P2) - Minor:**
+- UI glitches (layout, styling)
+- Loading state nie wyświetla się poprawnie
+- Error messages nieintuicyjne
+- **Action:** Fix in next sprint
+
+**Low (P3) - Trivial:**
+- Typo w tekście
+- Hover effect delay
+- Minor accessibility issues
+- **Action:** Backlog, fix when time permits
+
+---
+
+## 9. Role i Odpowiedzialności w Procesie Testowania
+
+### 9.1 Zespół (Solo Developer + Opcjonalnie QA)
+
+**Developer (Ty):**
+- ✅ Unit testing podczas development
+- ✅ Integration testing (API)
+- ✅ Functional testing (manual)
+- ✅ Security testing (checklist)
+- ✅ Performance optimization
+- ✅ Bug fixing
+- ✅ Code reviews (self-review)
+
+**QA Tester (Opcjonalnie - jeśli dostępny):**
+- ✅ Manual functional testing
+- ✅ Exploratory testing
+- ✅ Regression testing
+- ✅ User Acceptance Testing coordination
+- ✅ Bug reporting
+
+**Beta Users (2-3 osoby z docelowej grupy):**
+- ✅ User Acceptance Testing (UAT)
+- ✅ Real-world usage scenarios
+- ✅ Feedback on UX/UI
+- ✅ Bug reporting (critical issues)
+
+---
+
+## 10. Procedury Raportowania Błędów
+
+### 10.1 Bug Report Template
+
+```markdown
+## Bug Report
+
+**ID:** BUG-{number}  
+**Title:** Krótki, opisowy tytuł  
+**Severity:** Critical / High / Medium / Low  
+**Status:** New / In Progress / Fixed / Verified / Closed  
+
+**Environment:**
+- URL: http://localhost:3000 / https://[production]
+- Browser: Chrome 120 / Firefox 121 / Safari 17
+- Device: Desktop / Mobile (iPhone 12)
+- OS: Windows 11 / macOS Sonoma / iOS 17
+
+**Steps to Reproduce:**
+1. Krok 1
+2. Krok 2
+3. Krok 3
+
+**Expected Result:**
+Co powinno się stać
+
+**Actual Result:**
+Co faktycznie się stało
+
+**Screenshots/Video:**
+[Załącz screenshot lub link do video]
+
+**Console Errors:**
+```
+[Skopiuj błędy z browser console]
+```
+
+**Additional Info:**
+- User role: free / premium / admin
+- Network conditions: online / offline / slow 3G
+- Reproducibility: Always / Sometimes / Once
+```
+
+### 10.2 Bug Workflow
+
+1. **Discovery:** Bug znaleziony podczas testowania
+2. **Report:** Utworzenie bug reportu (według template)
+3. **Triage:** Przypisanie severity + priority
+4. **Assignment:** Przypisanie do developera (self-assign)
+5. **Fix:** Developer naprawia bug
+6. **Verification:** Re-test by QA/Developer
+7. **Regression:** Sprawdzenie czy fix nie wprowadził nowych bugów
+8. **Closure:** Bug closed jeśli verified
+
+### 10.3 Bug Tracking Tool
+
+**Opcje:**
+- **GitHub Issues** (recommended dla solo dev)
+  - Labels: bug, critical, high, medium, low
+  - Projects board: To Do / In Progress / Done
+- **Notion** (alternatywa)
+  - Database z custom properties
+  - Kanban view
+- **Linear** (opcjonalnie)
+  - Professional issue tracking
+  - Integrates with Git
+
+---
+
+## 11. Ryzyka i Mitigacje
+
+### 11.1 Obszary Wysokiego Ryzyka
+
+#### Ryzyko 1: Supabase Auth Integration Issues
+
+**Opis:** Problemy z konfiguracją Supabase Auth (callback URLs, email templates)
+
+**Impact:** Krytyczny - brak możliwości logowania
+
+**Mitigacja:**
+- ✅ Dokładne przetestowanie invite flow + magic link flow
+- ✅ Weryfikacja callback URL configuration w Supabase Dashboard
+- ✅ Test email delivery (sprawdzenie spam folder)
+- ✅ Monitoring auth events w Supabase logs
+
+**Plan B:**
+- Backup: Fallback do passwordless email (jeśli magic link fails)
+- Temporary: Manual account creation by admin w Supabase Dashboard
+
+---
+
+#### Ryzyko 2: RLS Policies Misconfiguration
+
+**Opis:** RLS policies nie działają poprawnie → data leak lub brak dostępu
+
+**Impact:** Krytyczny - security breach lub funkcjonalność zepsuta
+
+**Mitigacja:**
+- ✅ Dokładne przetestowanie każdej RLS policy
+- ✅ Test z różnymi rolami (free/premium/admin)
+- ✅ Verify policies w Supabase SQL Editor
+- ✅ Negative testing - próba dostępu bez uprawnień
+
+**Plan B:**
+- Emergency: Disable RLS tymczasowo, implement server-side auth checks
+
+---
+
+#### Ryzyko 3: Video Playback Issues
+
+**Opis:** Video nie odtwarza się (format, signed URLs, network issues)
+
+**Impact:** Wysoki - core functionality nie działa
+
+**Mitigacja:**
+- ✅ Test na różnych przeglądarkach/urządzeniach
+- ✅ Weryfikacja formatów wideo (MP4 H.264)
+- ✅ Test signed URL expiry + regeneration
+- ✅ Fallback na public URLs dla free content
+
+**Plan B:**
+- Fallback: Link do downloadowania wideo (jeśli playback fails)
+- Alternative: YouTube private links (temporary)
+
+---
+
+#### Ryzyko 4: Performance Issues (Slow Loading)
+
+**Opis:** Strona ładuje się wolno (> 5s), video buffering
+
+**Impact:** Średni - poor UX, users frustrated
+
+**Mitigacja:**
+- ✅ Optimize bundle size (code splitting)
+- ✅ Image optimization (thumbnail compression)
+- ✅ CDN dla static assets
+- ✅ Lazy loading dla komponentów React
+
+**Plan B:**
+- Optimize later (post-MVP) jeśli nie blocker
+- Reduce video quality (lower bitrate)
+
+---
+
+#### Ryzyko 5: Time Constraints (3 tygodnie)
+
+**Opis:** Brak czasu na comprehensive testing
+
+**Impact:** Średni - bugs w produkcji
+
+**Mitigacja:**
+- ✅ Priorytetyzacja testów: critical paths first
+- ✅ Automated smoke tests (jeśli czas pozwala)
+- ✅ Beta testing z 2-3 users przed public release
+- ✅ Post-launch monitoring (Supabase logs)
+
+**Plan B:**
+- Staged rollout - deploy do małej grupy (5 users) najpierw
+- Quick fix cycles post-launch (monitoring + rapid response)
+
+---
+
+## 12. Podsumowanie i Następne Kroki
+
+### 12.1 Podsumowanie Planu
+
+Ten plan testów definiuje kompleksową strategię testowania dla MVP platformy wideo z ćwiczeniami fizycznymi. Skupia się na:
+
+1. **Krytycznych przepływach autentykacji** (invite + magic link)
+2. **Kontroli dostępu** (RLS policies, premium gating)
+3. **Core functionality** (przeglądanie i odtwarzanie wideo)
+4. **Bezpieczeństwie** (session management, XSS/CSRF prevention)
+5. **Wydajności i dostępności** (< 3s load time, WCAG AA compliance)
+
+### 12.2 Następne Kroki
+
+**Faza 1: Przygotowanie (Tydzień 1)**
+- [ ] Setup test environment (Supabase dev project)
+- [ ] Create test users (5 accounts: 2 free, 2 premium, 1 admin)
+- [ ] Upload test videos (3-4 nagrania)
+- [ ] Setup Postman collection (API tests)
+
+**Faza 2: Continuous Testing (Tydzień 1-2)**
+- [ ] Unit testing podczas development
+- [ ] Daily smoke tests
+- [ ] Integration testing (API + Supabase)
+
+**Faza 3: Comprehensive Testing (Tydzień 2-3)**
+- [ ] Functional testing (all scenarios)
+- [ ] Security testing (checklist)
+- [ ] Performance testing (Lighthouse)
+- [ ] Cross-browser testing
+
+**Faza 4: Pre-Launch (Tydzień 3)**
+- [ ] User Acceptance Testing (2-3 beta users)
+- [ ] Final bug fixes
+- [ ] Production smoke tests
+- [ ] Go/No-Go decision
+
+**Faza 5: Post-Launch Monitoring**
+- [ ] Monitor Supabase logs (auth, errors)
+- [ ] User feedback collection
+- [ ] Quick bug fixes (P0/P1)
+- [ ] Iterative improvements
+
+---
+
+## Appendix A: Test Checklist (Quick Reference)
+
+### Pre-Deployment Checklist
+
+**Autentykacja:**
+- [ ] TC-AUTH-001: Invite Flow działa
+- [ ] TC-AUTH-002: Magic Link Login działa
+- [ ] TC-AUTH-003: Email enumeration prevention verified
+- [ ] TC-AUTH-004: Session refresh działa
+- [ ] TC-AUTH-005: Logout działa
+
+**Kontrola Dostępu:**
+- [ ] TC-ACCESS-001: Free user → Premium Gate wyświetla się
+- [ ] TC-ACCESS-002: Premium user → Full access do premium content
+- [ ] TC-ACCESS-003: Niezalogowany → Redirect do login
+- [ ] TC-ACCESS-004: Admin → Dostęp do draft videos
+
+**Video:**
+- [ ] TC-VIDEO-001: Lista nagrań wyświetla się
+- [ ] TC-VIDEO-002: Filtrowanie po kategorii działa
+- [ ] TC-VIDEO-003: Filtrowanie po poziomie działa
+- [ ] TC-VIDEO-004: Filtrowanie po typie działa
+- [ ] TC-VIDEO-006: Video playback działa
+- [ ] TC-VIDEO-007: Kontrolki video playera działają
+
+**API:**
+- [ ] TC-API-001: GET /api/videos działa
+- [ ] TC-API-002: GET /api/videos/:id działa
+- [ ] TC-API-003: GET /api/health działa
+
+**Security:**
+- [ ] HttpOnly cookies enabled
+- [ ] HTTPS enforced (production)
+- [ ] RLS policies enabled
+- [ ] Rate limiting configured
+- [ ] Input validation (Zod)
+
+**Performance:**
+- [ ] Lighthouse score > 80 (desktop)
+- [ ] Load time < 3s
+- [ ] Video playback start < 2s
+
+---
+
+## Appendix B: Known Limitations (MVP)
+
+**Out of Scope - Nie testujemy:**
+- ❌ Admin panel UI (zarządzanie przez Supabase Dashboard)
+- ❌ Upload wideo przez UI
+- ❌ Płatności online
+- ❌ User profile editing
+- ❌ Playlisty
+- ❌ Komentarze
+- ❌ Analytics tracking
+- ❌ Multi-language support
+- ❌ Light theme
+- ❌ Email notifications (poza auth emails)
+
+**Technical Debt (Post-MVP):**
+- Automated E2E tests (Playwright)
+- Unit tests coverage > 70%
+- Performance optimization (code splitting)
+- Advanced monitoring (Sentry, LogRocket)
+
+---
+
+**Koniec Planu Testów** - Wersja 1.0 (2026-01-24)
