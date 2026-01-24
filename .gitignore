@@ -1,6 +1,7 @@
 # build output
 dist/
 
+*dist*
 # generated types
 .astro/
 
@@ -22,3 +23,12 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Playwright E2E Tests
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Vitest coverage
+coverage/
+dist/server/pages/video/_id_.astro.mjs
