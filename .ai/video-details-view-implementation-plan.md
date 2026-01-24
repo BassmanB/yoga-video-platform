@@ -5,6 +5,7 @@
 Widok szczegółów nagrania (`/video/[id]`) umożliwia użytkownikom odtwarzanie wybranego nagrania wideo wraz z pełną kontrolą odtwarzacza oraz wyświetleniem szczegółowych informacji o treści. Widok implementuje kontrolę dostępu do treści premium, zapewniając optymalną obsługę zarówno treści darmowych jak i płatnych poprzez wykorzystanie Supabase Storage z podpisanymi URL-ami.
 
 **Główne funkcjonalności:**
+
 - Odtwarzanie wideo z pełną kontrolą (play/pause, seek, volume, fullscreen, speed control)
 - Wyświetlanie metadanych nagrania (tytuł, kategoria, poziom, czas trwania, opis)
 - Kontrola dostępu premium z wyświetlaniem odpowiedniego komunikatu dla nieuprawnionych użytkowników
@@ -16,10 +17,12 @@ Widok szczegółów nagrania (`/video/[id]`) umożliwia użytkownikom odtwarzani
 **Ścieżka:** `/video/[id]`
 
 **Struktura plików:**
+
 - Plik Astro: `src/pages/video/[id].astro`
 - Parametr dynamiczny: `id` (UUID nagrania)
 
 **Przykłady URL:**
+
 - `/video/550e8400-e29b-41d4-a716-446655440000`
 - `/video/660e8400-e29b-41d4-a716-446655440001`
 
@@ -43,6 +46,7 @@ Widok szczegółów nagrania (`/video/[id]`) umożliwia użytkownikom odtwarzani
 ```
 
 **Diagram zależności:**
+
 ```
 [id].astro
     ↓
@@ -52,7 +56,7 @@ VideoPlayerContainer (state orchestrator)
     ├─→ VideoPlayer (success + hasAccess)
     ├─→ PremiumGate (success + !hasAccess)
     └─→ VideoPlayerError (error)
-    
+
 VideoDetails (always rendered with video data)
 ```
 
@@ -64,20 +68,25 @@ VideoDetails (always rendered with video data)
 Komponent nawigacyjny umożliwiający powrót do poprzedniej strony lub strony głównej. Wyświetla ikonę strzałki z tekstem "Powrót".
 
 **Główne elementy:**
+
 - `<button>` z klasami Tailwind dla stylizacji
 - Ikona strzałki w lewo (z biblioteki `lucide-react`)
 - Tekst "Powrót"
 
 **Obsługiwane zdarzenia:**
+
 - `onClick`: Wywołuje `window.history.back()` lub w przypadku braku historii przekierowuje na `/` używając `window.location.href = '/'`
 
 **Warunki walidacji:**
+
 - Brak walidacji - komponent czysto prezentacyjny
 
 **Typy:**
+
 - Brak dodatkowych typów - komponent nie przyjmuje props
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface BackButtonProps {
   // Opcjonalny className dla dodatkowych styli
@@ -93,6 +102,7 @@ interface BackButtonProps {
 Główny komponent orkiestrujący całą logikę widoku odtwarzacza. Zarządza stanem ładowania, pobiera dane nagrania z API, sprawdza uprawnienia dostępu, generuje URL do pliku wideo i renderuje odpowiedni podkomponent w zależności od stanu.
 
 **Główne elementy:**
+
 - Container `<div>` z max-width i centrowaniem
 - Warunkowe renderowanie podkomponentów:
   - `VideoPlayerSkeleton` gdy `isLoading === true`
@@ -101,22 +111,26 @@ Główny komponent orkiestrujący całą logikę widoku odtwarzacza. Zarządza s
   - `VideoPlayerError` gdy `error !== null`
 
 **Obsługiwane zdarzenia:**
+
 - `useEffect` do pobrania danych nagrania przy montowaniu
 - `useEffect` do wygenerowania URL wideo po pobraniu danych
 - Retry action z `VideoPlayerError` - ponowne wywołanie fetch
 
 **Warunki walidacji:**
+
 - Walidacja UUID parametru `id` przed fetchem API
 - Sprawdzenie czy użytkownik ma dostęp do premium content: `canAccessVideo(video, userRole)`
 - Timeout 10s dla operacji fetch - jeśli przekroczony, wyświetl błąd timeout
 
 **Typy:**
+
 - `Video` - z `src/types.ts`
 - `VideoPlayerState` - custom ViewModel (patrz sekcja 5)
 - `ErrorResponse` - z `src/types.ts`
 - `UserRole` - z `src/types.ts`
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface VideoPlayerContainerProps {
   videoId: string; // UUID przekazany z Astro
@@ -132,20 +146,25 @@ interface VideoPlayerContainerProps {
 Komponent wyświetlający skeleton loader podczas ładowania danych nagrania. Zajmuje przestrzeń odtwarzacza z zachowaniem aspect ratio 16:9.
 
 **Główne elementy:**
+
 - `<div>` z klasą aspect ratio 16:9
 - Pulsujący gradient (Tailwind `animate-pulse`, `bg-slate-700`)
 - Ikona play w centrum (opcjonalnie)
 
 **Obsługiwane zdarzenia:**
+
 - Brak - komponent czysto prezentacyjny
 
 **Warunki walidacji:**
+
 - Brak
 
 **Typy:**
+
 - Brak
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface VideoPlayerSkeletonProps {
   className?: string;
@@ -160,6 +179,7 @@ interface VideoPlayerSkeletonProps {
 Wrapper dla biblioteki Plyr implementujący odtwarzacz wideo z pełną kontrolą. Obsługuje różne źródła wideo (public URL dla free content, signed URL dla premium), stany buffering, błędy playback.
 
 **Główne elementy:**
+
 - `<video>` element HTML5 z atrybutem `controls`
 - Inicjalizacja Plyr w `useEffect` po montowaniu
 - Konfiguracja Plyr controls (play/pause, progress, volume, fullscreen, speed)
@@ -167,20 +187,24 @@ Wrapper dla biblioteki Plyr implementujący odtwarzacz wideo z pełną kontrolą
 - Error overlay w przypadku błędu playback
 
 **Obsługiwane zdarzenia:**
+
 - `onReady`: Plyr player gotowy do odtwarzania
 - `onError`: Błąd podczas ładowania/odtwarzania wideo
 - `onPlay`, `onPause`: Śledzenie stanu odtwarzania (opcjonalnie dla analytics)
 - Cleanup w `useEffect` return - destroy Plyr instance
 
 **Warunki walidacji:**
+
 - Sprawdzenie czy `videoUrl` jest prawidłowym URL przed montowaniem playera
 - Timeout 10s dla ładowania wideo - jeśli przekroczony, wyświetl komunikat
 
 **Typy:**
+
 - `PlyrOptions` - z biblioteki `plyr`
 - `PlyrInstance` - z biblioteki `plyr`
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface VideoPlayerProps {
   videoUrl: string; // Pełny URL do pliku wideo (public lub signed)
@@ -198,22 +222,27 @@ interface VideoPlayerProps {
 Komponent wyświetlający komunikat błędu w przypadku problemów z załadowaniem nagrania. Oferuje możliwość ponowienia próby (retry).
 
 **Główne elementy:**
+
 - Container z ikoną błędu
 - Komunikat błędu (dostosowany do typu błędu)
 - Przycisk "Spróbuj ponownie"
 - Przycisk "Powrót do strony głównej" (secondary)
 
 **Obsługiwane zdarzenia:**
+
 - `onClick` na przycisku retry - wywołanie `onRetry` callback
 - `onClick` na przycisku home - przekierowanie na `/`
 
 **Warunki walidacji:**
+
 - Brak
 
 **Typy:**
+
 - `VideoErrorType` - custom enum (patrz sekcja 5)
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface VideoPlayerErrorProps {
   error: VideoErrorType;
@@ -231,6 +260,7 @@ interface VideoPlayerErrorProps {
 Komponent overlay wyświetlany gdy użytkownik próbuje uzyskać dostęp do premium content bez odpowiednich uprawnień. Pokazuje rozmytą miniaturkę, informacje o nagraniu i CTA do kontaktu z adminem.
 
 **Główne elementy:**
+
 - Fullscreen overlay z `backdrop-blur-md`
 - Centred card (`max-w-lg`)
 - Rozmyta miniaturka nagrania (blur filter CSS)
@@ -242,18 +272,22 @@ Komponent overlay wyświetlany gdy użytkownik próbuje uzyskać dostęp do prem
 - Przycisk secondary: "Powrót do strony głównej"
 
 **Obsługiwane zdarzenia:**
+
 - `onClick` na backdrop - zamknięcie overlay (opcjonalnie)
 - `onKeyDown` - zamknięcie na ESC key
 - `onClick` na CTA button - otwarcie emaila
 - `onClick` na home button - przekierowanie na `/`
 
 **Warunki walidacji:**
+
 - Brak
 
 **Typy:**
+
 - `Video` - z `src/types.ts`
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface PremiumGateProps {
   video: Video; // Dane nagrania dla wyświetlenia podstawowych info
@@ -271,21 +305,26 @@ interface PremiumGateProps {
 Komponent wyświetlający szczegółowe informacje o nagraniu poniżej odtwarzacza. Składa się z sekcji nagłówkowej z metadanymi oraz rozwijalnego opisu.
 
 **Główne elementy:**
+
 - Container `<div>` ze stack layout (flex column)
 - `VideoHeader` - nagłówek z tytułem i metadanymi
 - `VideoDescription` - pełny opis (z opcją expand jeśli długi)
 - `RelatedVideos` (optional, future) - powiązane nagrania
 
 **Obsługiwane zdarzenia:**
+
 - Brak - deleguje obsługę do subkomponentów
 
 **Warunki walidacji:**
+
 - Brak
 
 **Typy:**
+
 - `Video` - z `src/types.ts`
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface VideoDetailsProps {
   video: Video;
@@ -301,6 +340,7 @@ interface VideoDetailsProps {
 Subkomponent `VideoDetails` wyświetlający tytuł nagrania oraz metadane w formie badges (kategoria, poziom, czas trwania).
 
 **Główne elementy:**
+
 - `<h1>` z tytułem nagrania (`text-3xl md:text-4xl font-bold`)
 - Flex row z badges:
   - Badge kategoria (z kolorowym tłem według kategorii)
@@ -308,16 +348,20 @@ Subkomponent `VideoDetails` wyświetlający tytuł nagrania oraz metadane w form
   - Badge czas trwania (sformatowany jako MM:SS)
 
 **Obsługiwane zdarzenia:**
+
 - Brak
 
 **Warunki walidacji:**
+
 - Brak
 
 **Typy:**
+
 - `Video` - z `src/types.ts`
 - `FormattedDuration` - helper type (patrz sekcja 5)
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface VideoHeaderProps {
   title: string;
@@ -336,21 +380,26 @@ interface VideoHeaderProps {
 Subkomponent `VideoDetails` wyświetlający pełny opis nagrania z funkcją rozwijania jeśli tekst jest długi (>300px wysokości).
 
 **Główne elementy:**
+
 - `<div>` z tekstem opisu (`text-base text-slate-300 leading-relaxed`)
 - Przycisk "Rozwiń" / "Zwiń" (conditional, jeśli opis przekracza wysokość)
 - Gradient fade-out na końcu tekstu (gdy zwinięty)
 
 **Obsługiwane zdarzenia:**
+
 - `onClick` na przycisku expand/collapse - toggle stan `isExpanded`
 - `useRef` + `useEffect` do pomiaru wysokości contentu
 
 **Warunki walidacji:**
+
 - Brak
 
 **Typy:**
+
 - Brak dodatkowych typów
 
 **Props (interfejs komponentu):**
+
 ```typescript
 interface VideoDescriptionProps {
   description: string | null;
@@ -368,15 +417,7 @@ Wykorzystywane bezpośrednio z `src/types.ts`:
 
 ```typescript
 // Importowane z src/types.ts
-import type {
-  Video,
-  VideoCategory,
-  VideoLevel,
-  VideoStatus,
-  UserRole,
-  VideoResponse,
-  ErrorResponse
-} from '@/types';
+import type { Video, VideoCategory, VideoLevel, VideoStatus, UserRole, VideoResponse, ErrorResponse } from "@/types";
 ```
 
 ### 5.2 Nowe typy ViewModel
@@ -392,17 +433,17 @@ Stan zarządzający całym cyklem życia widoku odtwarzacza.
 interface VideoPlayerState {
   // Dane nagrania
   video: Video | null;
-  
+
   // URL do odtwarzania (public lub signed)
   videoUrl: string | null;
-  
+
   // Stany ładowania
   isLoading: boolean;
   isLoadingUrl: boolean;
-  
+
   // Stan błędu
   error: VideoError | null;
-  
+
   // Stan dostępu
   hasAccess: boolean;
 }
@@ -416,13 +457,13 @@ Szczegółowy opis błędu dla lepszej obsługi UX.
 /**
  * Typ błędu odtwarzacza
  */
-type VideoErrorType = 
-  | 'NOT_FOUND'          // Nagranie nie istnieje lub brak dostępu (404)
-  | 'NETWORK_ERROR'      // Błąd sieci podczas fetch
-  | 'TIMEOUT'            // Przekroczenie timeout (10s)
-  | 'PLAYBACK_ERROR'     // Błąd podczas odtwarzania wideo
-  | 'INVALID_URL'        // Nieprawidłowy URL wideo
-  | 'UNKNOWN';           // Nieznany błąd
+type VideoErrorType =
+  | "NOT_FOUND" // Nagranie nie istnieje lub brak dostępu (404)
+  | "NETWORK_ERROR" // Błąd sieci podczas fetch
+  | "TIMEOUT" // Przekroczenie timeout (10s)
+  | "PLAYBACK_ERROR" // Błąd podczas odtwarzania wideo
+  | "INVALID_URL" // Nieprawidłowy URL wideo
+  | "UNKNOWN"; // Nieznany błąd
 
 /**
  * Obiekt błędu wideo
@@ -460,7 +501,7 @@ Wynik sprawdzenia uprawnień dostępu.
  */
 interface AccessCheckResult {
   hasAccess: boolean;
-  reason?: 'PREMIUM_REQUIRED' | 'NOT_PUBLISHED' | 'ARCHIVED';
+  reason?: "PREMIUM_REQUIRED" | "NOT_PUBLISHED" | "ARCHIVED";
   requiredRole?: UserRole;
 }
 ```
@@ -515,10 +556,11 @@ const [state, setState] = useState<VideoPlayerState>({
 **Lokalizacja:** `src/hooks/useVideoPlayer.ts`
 
 **Interfejs:**
+
 ```typescript
 function useVideoPlayer(videoId: string, userRole: UserRole | null) {
   // Wewnętrzna implementacja
-  
+
   return {
     video: Video | null,
     videoUrl: string | null,
@@ -533,6 +575,7 @@ function useVideoPlayer(videoId: string, userRole: UserRole | null) {
 **Wewnętrzna logika:**
 
 1. **Initial fetch** - Pobranie danych nagrania z API
+
    ```typescript
    useEffect(() => {
      fetchVideoData();
@@ -540,6 +583,7 @@ function useVideoPlayer(videoId: string, userRole: UserRole | null) {
    ```
 
 2. **Access check** - Sprawdzenie uprawnień po pobraniu danych
+
    ```typescript
    useEffect(() => {
      if (video) {
@@ -550,6 +594,7 @@ function useVideoPlayer(videoId: string, userRole: UserRole | null) {
    ```
 
 3. **URL generation** - Wygenerowanie URL tylko jeśli użytkownik ma dostęp
+
    ```typescript
    useEffect(() => {
      if (video && hasAccess) {
@@ -561,7 +606,7 @@ function useVideoPlayer(videoId: string, userRole: UserRole | null) {
 4. **Retry mechanism** - Możliwość ponownej próby przy błędzie
    ```typescript
    const retry = useCallback(() => {
-     setState(prev => ({ ...prev, error: null, isLoading: true }));
+     setState((prev) => ({ ...prev, error: null, isLoading: true }));
      fetchVideoData();
    }, [videoId]);
    ```
@@ -593,6 +638,7 @@ Dla MVP zakładamy, że dane użytkownika są przekazywane z Astro page jako pro
 **Implementacja:** `src/pages/api/videos/[id].ts`
 
 **Request:**
+
 ```typescript
 // Typ Request: brak body, tylko URL param
 interface GetVideoByIdRequest {
@@ -606,6 +652,7 @@ interface GetVideoByIdRequest {
 ```
 
 **Response Success (200):**
+
 ```typescript
 // Typ odpowiedzi: VideoResponse z src/types.ts
 interface VideoResponse {
@@ -632,6 +679,7 @@ interface VideoResponse {
 ```
 
 **Response Error (404):**
+
 ```typescript
 // Typ błędu: ErrorResponse z src/types.ts
 {
@@ -646,6 +694,7 @@ interface VideoResponse {
 ```
 
 **Response Error (403):**
+
 ```typescript
 {
   "error": {
@@ -667,19 +716,16 @@ interface VideoResponse {
 ```typescript
 /**
  * Pobiera dane nagrania z API
- * 
+ *
  * @param videoId - UUID nagrania
  * @param supabase - Klient Supabase (dla auth token)
  * @returns Promise z danymi nagrania lub null
  * @throws VideoError w przypadku błędu
  */
-async function fetchVideoById(
-  videoId: string,
-  supabase: SupabaseClient
-): Promise<Video> {
+async function fetchVideoById(videoId: string, supabase: SupabaseClient): Promise<Video> {
   // Walidacja UUID
   if (!isValidUUID(videoId)) {
-    throw new VideoError('INVALID_URL', 'Invalid video ID format');
+    throw new VideoError("INVALID_URL", "Invalid video ID format");
   }
 
   // Timeout 10s
@@ -690,7 +736,7 @@ async function fetchVideoById(
     const response = await fetch(`/api/videos/${videoId}`, {
       signal: controller.signal,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         // Token automatycznie dodawany przez Supabase client
       },
     });
@@ -699,21 +745,20 @@ async function fetchVideoById(
 
     if (!response.ok) {
       if (response.status === 404) {
-        throw new VideoError('NOT_FOUND', 'Video not found');
+        throw new VideoError("NOT_FOUND", "Video not found");
       }
       if (response.status === 403) {
         const errorData: ErrorResponse = await response.json();
-        throw new VideoError('FORBIDDEN', errorData.error.message);
+        throw new VideoError("FORBIDDEN", errorData.error.message);
       }
-      throw new VideoError('NETWORK_ERROR', 'Failed to fetch video');
+      throw new VideoError("NETWORK_ERROR", "Failed to fetch video");
     }
 
     const data: VideoResponse = await response.json();
     return data.data;
-    
   } catch (error) {
-    if (error.name === 'AbortError') {
-      throw new VideoError('TIMEOUT', 'Request timeout. Please check your connection.');
+    if (error.name === "AbortError") {
+      throw new VideoError("TIMEOUT", "Request timeout. Please check your connection.");
     }
     throw error;
   }
@@ -723,32 +768,27 @@ async function fetchVideoById(
 ### 7.3 Generowanie URL wideo
 
 **Free content:**
+
 ```typescript
 function getPublicVideoUrl(video: Video, supabase: SupabaseClient): string {
-  const bucket = 'videos-free';
-  const { data } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(video.video_url);
-  
+  const bucket = "videos-free";
+  const { data } = supabase.storage.from(bucket).getPublicUrl(video.video_url);
+
   return data.publicUrl;
 }
 ```
 
 **Premium content:**
+
 ```typescript
-async function getSignedVideoUrl(
-  video: Video,
-  supabase: SupabaseClient
-): Promise<string> {
-  const bucket = 'videos-premium';
+async function getSignedVideoUrl(video: Video, supabase: SupabaseClient): Promise<string> {
+  const bucket = "videos-premium";
   const expiresIn = 3600; // 1 godzina
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(video.video_url, expiresIn);
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(video.video_url, expiresIn);
 
   if (error) {
-    throw new VideoError('INVALID_URL', 'Failed to generate video URL');
+    throw new VideoError("INVALID_URL", "Failed to generate video URL");
   }
 
   return data.signedUrl;
@@ -756,11 +796,9 @@ async function getSignedVideoUrl(
 ```
 
 **Wrapper function:**
+
 ```typescript
-async function generateVideoUrl(
-  video: Video,
-  supabase: SupabaseClient
-): Promise<string> {
+async function generateVideoUrl(video: Video, supabase: SupabaseClient): Promise<string> {
   if (video.is_premium) {
     return await getSignedVideoUrl(video, supabase);
   }
@@ -777,11 +815,13 @@ async function generateVideoUrl(
 **Źródło:** Kliknięcie na kartę nagrania na stronie głównej
 
 **Akcja:**
+
 1. Router Astro przechodzi do `/video/[id]`
 2. SSR renderuje stronę z przekazanym `videoId`
 3. Komponent `VideoPlayerContainer` montuje się i rozpoczyna fetch
 
 **Oczekiwany wynik:**
+
 - URL zmienia się na `/video/[id]`
 - Wyświetla się skeleton loader
 - Po załadowaniu danych pojawia się odtwarzacz lub PremiumGate
@@ -791,11 +831,13 @@ async function generateVideoUrl(
 **Trigger:** Użytkownik klika play na odtwarzaczu
 
 **Akcja:**
+
 1. Plyr rozpoczyna buffering wideo
 2. Wyświetla się wskaźnik buffering
 3. Video zaczyna się odtwarzać
 
 **Oczekiwany wynik:**
+
 - Wideo odtwarza się płynnie
 - Kontrolki playera są responsywne
 - Użytkownik może kontrolować playback (pause, seek, volume)
@@ -805,10 +847,12 @@ async function generateVideoUrl(
 **Trigger:** Użytkownik wybiera inną prędkość z menu Plyr
 
 **Akcja:**
+
 1. Plyr zmienia `playbackRate` elementu `<video>`
 2. Odtwarzanie kontynuuje się z nową prędkością
 
 **Oczekiwany wynik:**
+
 - Prędkość zmienia się natychmiastowo
 - Dostępne opcje: 0.5x, 0.75x, 1x, 1.25x, 1.5x, 2x
 - Wybrana prędkość jest zaznaczona w menu
@@ -818,12 +862,14 @@ async function generateVideoUrl(
 **Trigger:** Użytkownik free lub niezalogowany wchodzi na URL premium nagrania
 
 **Akcja:**
+
 1. `useVideoPlayer` wykonuje fetch `/api/videos/:id`
 2. API zwraca 404 (z powodu RLS)
 3. Hook ustawia `hasAccess = false`
 4. Komponent renderuje `PremiumGate` overlay
 
 **Oczekiwany wynik:**
+
 - Wyświetla się overlay z rozmytą miniaturką
 - Komunikat: "Ta treść jest dostępna tylko dla użytkowników premium"
 - Przycisk CTA do kontaktu z adminem
@@ -834,11 +880,13 @@ async function generateVideoUrl(
 **Trigger:** Błąd ładowania → użytkownik klika retry button
 
 **Akcja:**
+
 1. Wywołanie funkcji `retry()` z hooka
 2. Reset stanu błędu
 3. Ponowne wywołanie `fetchVideoData()`
 
 **Oczekiwany wynik:**
+
 - Skeleton loader pojawia się ponownie
 - Próba ponownego pobrania danych
 - W przypadku sukcesu - wyświetlenie odtwarzacza
@@ -849,10 +897,12 @@ async function generateVideoUrl(
 **Trigger:** Kliknięcie przycisku "Powrót" lub logo w navbar
 
 **Akcja:**
+
 1. `BackButton`: wywołanie `window.history.back()` lub redirect na `/`
 2. Router przechodzi do strony głównej
 
 **Oczekiwany wynik:**
+
 - Użytkownik wraca do poprzedniej strony lub strony głównej
 - Odtwarzanie wideo zostaje zatrzymane (unmount komponentu)
 
@@ -861,10 +911,12 @@ async function generateVideoUrl(
 **Trigger:** Użytkownik klika ikonę fullscreen w Plyr
 
 **Akcja:**
+
 1. Plyr wywołuje Fullscreen API
 2. Player zajmuje cały ekran
 
 **Oczekiwany wynik:**
+
 - Video player w trybie fullscreen
 - Kontrolki nadal dostępne
 - ESC lub ponowne kliknięcie ikony wychodzi z fullscreen
@@ -880,6 +932,7 @@ async function generateVideoUrl(
 **Warunek:** Parametr `videoId` musi być prawidłowym UUID v4
 
 **Implementacja:**
+
 ```typescript
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -889,6 +942,7 @@ function isValidUUID(id: string): boolean {
 ```
 
 **Wpływ na UI:**
+
 - Jeśli UUID nieprawidłowy → natychmiastowy błąd `INVALID_URL`
 - Wyświetlenie `VideoPlayerError` z komunikatem "Nieprawidłowy adres nagrania"
 
@@ -902,10 +956,10 @@ function isValidUUID(id: string): boolean {
 function canAccessVideo(video: Video, userRole: UserRole | null): AccessCheckResult {
   // 1. Nagranie musi być opublikowane (status = 'published')
   //    Wyjątek: admin widzi wszystkie statusy
-  if (video.status !== 'published' && userRole !== 'admin') {
+  if (video.status !== "published" && userRole !== "admin") {
     return {
       hasAccess: false,
-      reason: video.status === 'archived' ? 'ARCHIVED' : 'NOT_PUBLISHED',
+      reason: video.status === "archived" ? "ARCHIVED" : "NOT_PUBLISHED",
     };
   }
 
@@ -915,20 +969,21 @@ function canAccessVideo(video: Video, userRole: UserRole | null): AccessCheckRes
   }
 
   // 3. Jeśli nagranie premium → wymagana rola premium lub admin
-  if (userRole === 'premium' || userRole === 'admin') {
+  if (userRole === "premium" || userRole === "admin") {
     return { hasAccess: true };
   }
 
   // 4. Brak dostępu do premium content
   return {
     hasAccess: false,
-    reason: 'PREMIUM_REQUIRED',
-    requiredRole: 'premium',
+    reason: "PREMIUM_REQUIRED",
+    requiredRole: "premium",
   };
 }
 ```
 
 **Wpływ na UI:**
+
 - `hasAccess = true` → renderowanie `VideoPlayer`
 - `hasAccess = false` + `reason = 'PREMIUM_REQUIRED'` → renderowanie `PremiumGate`
 - `hasAccess = false` + `reason = 'ARCHIVED' | 'NOT_PUBLISHED'` → `VideoPlayerError` z komunikatem "Nagranie niedostępne"
@@ -940,11 +995,12 @@ function canAccessVideo(video: Video, userRole: UserRole | null): AccessCheckRes
 **Warunek:** `videoUrl` musi być prawidłowym HTTP(S) URL
 
 **Implementacja:**
+
 ```typescript
 function isValidVideoUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
   } catch {
     return false;
   }
@@ -952,15 +1008,16 @@ function isValidVideoUrl(url: string): boolean {
 
 useEffect(() => {
   if (!isValidVideoUrl(videoUrl)) {
-    onError?.(new Error('Invalid video URL'));
+    onError?.(new Error("Invalid video URL"));
     return;
   }
-  
+
   // Inicjalizacja Plyr
 }, [videoUrl]);
 ```
 
 **Wpływ na UI:**
+
 - Jeśli URL nieprawidłowy → wywołanie `onError` callback
 - Parent component (`VideoPlayerContainer`) wyświetli `VideoPlayerError`
 
@@ -971,6 +1028,7 @@ useEffect(() => {
 **Warunek:** Operacje nie mogą trwać dłużej niż 10 sekund
 
 **Implementacja fetch timeout:**
+
 ```typescript
 const controller = new AbortController();
 const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -986,22 +1044,24 @@ fetch(url, { signal: controller.signal })
 ```
 
 **Implementacja video loading timeout:**
+
 ```typescript
 useEffect(() => {
   const player = plyrRef.current;
   const timeoutId = setTimeout(() => {
     if (!player?.playing) {
-      onError?.(new Error('Video loading timeout'));
+      onError?.(new Error("Video loading timeout"));
     }
   }, 10000);
 
-  player?.on('playing', () => clearTimeout(timeoutId));
-  
+  player?.on("playing", () => clearTimeout(timeoutId));
+
   return () => clearTimeout(timeoutId);
 }, []);
 ```
 
 **Wpływ na UI:**
+
 - Po 10s bez odpowiedzi → `VideoPlayerError` z komunikatem "Sprawdź połączenie internetowe"
 - Przycisk retry umożliwia ponowną próbę
 
@@ -1012,6 +1072,7 @@ useEffect(() => {
 **Warunek:** Jeśli wysokość contentu > 300px → pokaż przycisk "Rozwiń"
 
 **Implementacja:**
+
 ```typescript
 const descriptionRef = useRef<HTMLDivElement>(null);
 const [showExpandButton, setShowExpandButton] = useState(false);
@@ -1026,6 +1087,7 @@ useEffect(() => {
 ```
 
 **Wpływ na UI:**
+
 - `height <= 300px` → pełny opis bez przycisku
 - `height > 300px` → opis obcięty z gradient fade + przycisk "Rozwiń"
 - Po kliknięciu → pełny opis + przycisk "Zwiń"
@@ -1037,24 +1099,27 @@ useEffect(() => {
 ### 10.1 Nagranie nie znalezione (404)
 
 **Przyczyna:**
+
 - UUID nie istnieje w bazie danych
 - Użytkownik nie ma uprawnień (RLS zwraca 404 dla bezpieczeństwa)
 
 **Obsługa:**
+
 ```typescript
 if (response.status === 404) {
   setState({
     ...initialState,
     isLoading: false,
     error: {
-      type: 'NOT_FOUND',
-      message: 'Nagranie nie zostało znalezione lub nie masz do niego dostępu.'
-    }
+      type: "NOT_FOUND",
+      message: "Nagranie nie zostało znalezione lub nie masz do niego dostępu.",
+    },
   });
 }
 ```
 
 **UI:**
+
 - Wyświetlenie `VideoPlayerError`
 - Komunikat: "Nagranie nie zostało znalezione"
 - Przyciski: "Powrót do strony głównej" (primary), "Spróbuj ponownie" (secondary)
@@ -1062,11 +1127,13 @@ if (response.status === 404) {
 ### 10.2 Błąd sieci / timeout
 
 **Przyczyna:**
+
 - Brak połączenia internetowego
 - Serwer nie odpowiada
 - Timeout 10s przekroczony
 
 **Obsługa:**
+
 ```typescript
 catch (error) {
   if (error.name === 'AbortError') {
@@ -1092,6 +1159,7 @@ catch (error) {
 ```
 
 **UI:**
+
 - Wyświetlenie `VideoPlayerError`
 - Komunikat dostosowany do typu błędu
 - Przycisk "Spróbuj ponownie" (primary)
@@ -1099,19 +1167,21 @@ catch (error) {
 ### 10.3 Błąd odtwarzania wideo (Plyr error)
 
 **Przyczyna:**
+
 - Plik wideo uszkodzony
 - Format nieobsługiwany
 - Signed URL wygasł
 
 **Obsługa:**
+
 ```typescript
 // W VideoPlayer.tsx
 useEffect(() => {
   const player = new Plyr(videoRef.current, config);
-  
-  player.on('error', (event) => {
+
+  player.on("error", (event) => {
     const error = event.detail?.plyr?.error;
-    onError?.(new Error(`Video playback error: ${error?.message || 'Unknown'}`));
+    onError?.(new Error(`Video playback error: ${error?.message || "Unknown"}`));
   });
 
   return () => player.destroy();
@@ -1119,6 +1189,7 @@ useEffect(() => {
 ```
 
 **UI:**
+
 - Wyświetlenie `VideoPlayerError` wewnątrz ramki playera
 - Komunikat: "Nie udało się odtworzyć wideo"
 - Przyciski: "Spróbuj ponownie", "Zgłoś problem" (mailto link)
@@ -1126,14 +1197,16 @@ useEffect(() => {
 ### 10.4 Brak dostępu do premium content
 
 **Przyczyna:**
+
 - Użytkownik free próbuje otworzyć premium nagranie
 - Użytkownik niezalogowany próbuje otworzyć premium nagranie
 
 **Obsługa:**
+
 ```typescript
 // Po pobraniu video
 const accessResult = canAccessVideo(video, userRole);
-if (!accessResult.hasAccess && accessResult.reason === 'PREMIUM_REQUIRED') {
+if (!accessResult.hasAccess && accessResult.reason === "PREMIUM_REQUIRED") {
   setState({
     ...state,
     video,
@@ -1145,6 +1218,7 @@ if (!accessResult.hasAccess && accessResult.reason === 'PREMIUM_REQUIRED') {
 ```
 
 **UI:**
+
 - Wyświetlenie `PremiumGate` overlay
 - Komunikat wyjaśniający wymagania
 - CTA do kontaktu z adminem
@@ -1153,10 +1227,12 @@ if (!accessResult.hasAccess && accessResult.reason === 'PREMIUM_REQUIRED') {
 ### 10.5 Nieprawidłowy UUID w URL
 
 **Przyczyna:**
+
 - Użytkownik wpisał lub zmodyfikował URL ręcznie
 - Błędny link zewnętrzny
 
 **Obsługa:**
+
 ```typescript
 // Przed wykonaniem fetch
 if (!isValidUUID(videoId)) {
@@ -1164,15 +1240,16 @@ if (!isValidUUID(videoId)) {
     ...initialState,
     isLoading: false,
     error: {
-      type: 'INVALID_URL',
-      message: 'Nieprawidłowy adres nagrania.'
-    }
+      type: "INVALID_URL",
+      message: "Nieprawidłowy adres nagrania.",
+    },
   });
   return; // Nie wykonuj fetch
 }
 ```
 
 **UI:**
+
 - Wyświetlenie `VideoPlayerError`
 - Komunikat: "Nieprawidłowy adres nagrania"
 - Przycisk: "Powrót do strony głównej"
@@ -1180,15 +1257,17 @@ if (!isValidUUID(videoId)) {
 ### 10.6 Signed URL wygasł podczas odtwarzania
 
 **Przyczyna:**
+
 - Użytkownik premium pauzuje wideo na >1h
 - Signed URL (3600s) wygasa
 
 **Obsługa:**
+
 ```typescript
 // W VideoPlayer.tsx - listener na błąd HTTP 403/404 podczas playback
-player.on('error', async (event) => {
+player.on("error", async (event) => {
   const error = event.detail?.plyr?.error;
-  
+
   // Sprawdź czy to błąd 403/404 (expired URL)
   if (error?.code === 4 || error?.code === 2) {
     // Callback do parent do regeneracji URL
@@ -1202,7 +1281,7 @@ const handleUrlExpired = useCallback(async () => {
   try {
     const newUrl = await generateVideoUrl(video, supabase);
     setVideoUrl(newUrl);
-    toast.info('Odświeżono połączenie z nagraniem');
+    toast.info("Odświeżono połączenie z nagraniem");
   } catch (error) {
     // Obsługa błędu regeneracji
   } finally {
@@ -1212,6 +1291,7 @@ const handleUrlExpired = useCallback(async () => {
 ```
 
 **UI:**
+
 - Automatyczne odświeżenie URL w tle
 - Toast notification: "Odświeżono połączenie"
 - Jeśli regeneracja się nie powiedzie → `VideoPlayerError`
@@ -1223,6 +1303,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 1: Przygotowanie środowiska i typów
 
 **Zadania:**
+
 1. Zainstaluj Plyr: `npm install plyr`
 2. Zainstaluj typy Plyr: `npm install -D @types/plyr`
 3. Zainstaluj ikony: `npm install lucide-react`
@@ -1230,6 +1311,7 @@ const handleUrlExpired = useCallback(async () => {
 5. Dodaj nowe typy (`VideoPlayerState`, `VideoError`, `FormattedDuration`, `AccessCheckResult`)
 
 **Weryfikacja:**
+
 - TypeScript kompiluje się bez błędów
 - Wszystkie importy są dostępne
 
@@ -1238,6 +1320,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 2: Implementacja funkcji pomocniczych
 
 **Zadania:**
+
 1. Utwórz `src/lib/utils/video.utils.ts`
 2. Zaimplementuj:
    - `isValidUUID(id: string): boolean`
@@ -1247,6 +1330,7 @@ const handleUrlExpired = useCallback(async () => {
 3. Dodaj testy jednostkowe (opcjonalnie)
 
 **Weryfikacja:**
+
 - Każda funkcja zwraca poprawne wartości dla różnych input
 - Edge cases obsłużone (null, undefined, nieprawidłowe wartości)
 
@@ -1255,6 +1339,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 3: Implementacja API client functions
 
 **Zadania:**
+
 1. Utwórz `src/lib/api/videos.ts` (jeśli nie istnieje)
 2. Zaimplementuj `fetchVideoById(videoId: string, supabase: SupabaseClient): Promise<Video>`
 3. Zaimplementuj `generateVideoUrl(video: Video, supabase: SupabaseClient): Promise<string>`
@@ -1262,6 +1347,7 @@ const handleUrlExpired = useCallback(async () => {
 5. Zaimplementuj `getSignedVideoUrl(video: Video, supabase: SupabaseClient): Promise<string>`
 
 **Weryfikacja:**
+
 - Testowe wywołanie z prawidłowym UUID zwraca dane
 - Testowe wywołanie z nieprawidłowym UUID rzuca odpowiedni błąd
 - Generowanie URL działa dla zarówno free jak premium content
@@ -1271,6 +1357,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 4: Implementacja custom hook useVideoPlayer
 
 **Zadania:**
+
 1. Utwórz `src/hooks/useVideoPlayer.ts`
 2. Zdefiniuj interfejs hooka
 3. Zaimplementuj logikę:
@@ -1282,6 +1369,7 @@ const handleUrlExpired = useCallback(async () => {
 4. Obsługa wszystkich typów błędów (walidacja, network, timeout)
 
 **Weryfikacja:**
+
 - Hook zwraca poprawny stan w każdej fazie (loading, success, error)
 - Retry działa poprawnie
 - Timeout jest respektowany
@@ -1291,6 +1379,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 5: Implementacja komponentów prezentacyjnych (dump components)
 
 **Zadania:**
+
 1. `BackButton.tsx` - prosty button z ikoną i logiką history.back()
 2. `VideoPlayerSkeleton.tsx` - skeleton loader z aspect ratio 16:9
 3. `VideoPlayerError.tsx` - komunikat błędu + retry button
@@ -1298,6 +1387,7 @@ const handleUrlExpired = useCallback(async () => {
 5. `VideoDescription.tsx` - opis z opcją expand/collapse
 
 **Weryfikacja:**
+
 - Każdy komponent renderuje się poprawnie w izolacji (Storybook lub test page)
 - Stylizacja zgodna z design system (Tailwind)
 - Responsywność (mobile + desktop)
@@ -1307,6 +1397,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 6: Implementacja PremiumGate
 
 **Zadania:**
+
 1. Utwórz `src/components/PremiumGate.tsx`
 2. Implementuj layout (fullscreen overlay, centered card)
 3. Dodaj rozmytą miniaturkę (blur filter)
@@ -1314,6 +1405,7 @@ const handleUrlExpired = useCallback(async () => {
 5. Obsługa dismiss (backdrop click, ESC key)
 
 **Weryfikacja:**
+
 - Overlay wyświetla się na pełnym ekranie
 - Backdrop blur działa poprawnie
 - Kliknięcie CTA otwiera email client
@@ -1324,6 +1416,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 7: Implementacja VideoPlayer
 
 **Zadania:**
+
 1. Utwórz `src/components/VideoPlayer.tsx`
 2. Zainstaluj i skonfiguruj Plyr
 3. Konfiguracja controls (play/pause, seek, volume, fullscreen, speed)
@@ -1334,6 +1427,7 @@ const handleUrlExpired = useCallback(async () => {
 8. Error state
 
 **Weryfikacja:**
+
 - Player montuje się poprawnie
 - Wszystkie kontrolki działają
 - Prędkość zmienia się (0.5x - 2x)
@@ -1345,12 +1439,14 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 8: Implementacja VideoDetails
 
 **Zadania:**
+
 1. Utwórz `src/components/VideoDetails.tsx`
 2. Kompozycja: VideoHeader + VideoDescription
 3. Stack layout (flex column)
 4. Responsywność
 
 **Weryfikacja:**
+
 - Wszystkie metadane wyświetlają się poprawnie
 - Opis rozwijany działa jeśli tekst długi
 - Layout responsywny
@@ -1360,6 +1456,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 9: Implementacja VideoPlayerContainer (orchestrator)
 
 **Zadania:**
+
 1. Utwórz `src/components/VideoPlayerContainer.tsx`
 2. Użyj hooka `useVideoPlayer(videoId, userRole)`
 3. Warunkowe renderowanie:
@@ -1371,6 +1468,7 @@ const handleUrlExpired = useCallback(async () => {
 5. Obsługa retry callback
 
 **Weryfikacja:**
+
 - Wszystkie stany renderują się poprawnie
 - Przejścia między stanami są płynne
 - Dane przekazywane do subkomponentów są poprawne
@@ -1380,6 +1478,7 @@ const handleUrlExpired = useCallback(async () => {
 ### Krok 10: Implementacja Astro page
 
 **Zadania:**
+
 1. Utwórz `src/pages/video/[id].astro`
 2. Pobierz `id` z `Astro.params`
 3. Pobierz dane użytkownika z `Astro.locals` (session, role)
@@ -1389,11 +1488,12 @@ const handleUrlExpired = useCallback(async () => {
 7. Renderuj `VideoDetails` (dane przekazane po załadowaniu w komponencie)
 
 **Struktura:**
+
 ```astro
 ---
-import Layout from '@/layouts/Layout.astro';
-import VideoPlayerContainer from '@/components/VideoPlayerContainer';
-import BackButton from '@/components/BackButton';
+import Layout from "@/layouts/Layout.astro";
+import VideoPlayerContainer from "@/components/VideoPlayerContainer";
+import BackButton from "@/components/BackButton";
 
 const { id } = Astro.params;
 const session = Astro.locals.session;
@@ -1403,16 +1503,13 @@ const userRole = session?.user?.user_metadata?.role || null;
 <Layout title="Odtwarzacz wideo">
   <div class="container mx-auto px-4 py-8">
     <BackButton />
-    <VideoPlayerContainer 
-      videoId={id} 
-      userRole={userRole}
-      client:load 
-    />
+    <VideoPlayerContainer videoId={id} userRole={userRole} client:load />
   </div>
 </Layout>
 ```
 
 **Weryfikacja:**
+
 - Strona renderuje się po przejściu na `/video/[id]`
 - SSR działa poprawnie
 - Client-side hydration działa (React komponenty interaktywne)
@@ -1422,6 +1519,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 ### Krok 11: Stylizacja i responsywność
 
 **Zadania:**
+
 1. Przejrzyj wszystkie komponenty pod kątem Tailwind classes
 2. Sprawdź responsywność na różnych breakpointach (mobile, tablet, desktop)
 3. Dostosuj spacing, typography zgodnie z design system
@@ -1429,6 +1527,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 5. Sprawdź dark mode (jeśli dotyczy)
 
 **Weryfikacja:**
+
 - Widok wygląda dobrze na mobile (320px+)
 - Widok wygląda dobrze na tablet (768px+)
 - Widok wygląda dobrze na desktop (1024px+)
@@ -1439,6 +1538,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 ### Krok 12: Obsługa błędów i edge cases
 
 **Zadania:**
+
 1. Testuj każdy typ błędu:
    - Nieprawidłowy UUID w URL
    - Nagranie nie znalezione (404)
@@ -1451,6 +1551,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 4. Dodaj logging błędów (console.error lub serwis analytics)
 
 **Weryfikacja:**
+
 - Każdy błąd wyświetla odpowiedni komunikat
 - Użytkownik może zawsze wrócić do strony głównej lub spróbować ponownie
 - Błędy są logowane dla debugowania
@@ -1460,6 +1561,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 ### Krok 13: Testy integracyjne
 
 **Zadania:**
+
 1. Test: Załadowanie free content jako niezalogowany użytkownik
 2. Test: Załadowanie premium content jako użytkownik premium
 3. Test: Próba dostępu do premium content jako użytkownik free
@@ -1470,6 +1572,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 8. Test: Powrót do strony głównej
 
 **Weryfikacja:**
+
 - Wszystkie scenariusze przechodzą pomyślnie
 - Brak błędów w konsoli
 - UX jest płynny i intuicyjny
@@ -1479,6 +1582,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 ### Krok 14: Accessibility audit
 
 **Zadania:**
+
 1. Sprawdź hierarchię nagłówków (H1 → H2 → H3)
 2. Dodaj ARIA labels gdzie potrzebne
 3. Sprawdź keyboard navigation (Tab, Enter, Space, Escape)
@@ -1487,11 +1591,13 @@ const userRole = session?.user?.user_metadata?.role || null;
 6. Sprawdź color contrast (tekst na tle)
 
 **Narzędzia:**
+
 - axe DevTools
 - Lighthouse (Chrome DevTools)
 - Klawiatura (manualne testy)
 
 **Weryfikacja:**
+
 - Lighthouse Accessibility score ≥ 90
 - Wszystkie interaktywne elementy dostępne z klawiatury
 - Screen reader może nawigować po stronie
@@ -1501,6 +1607,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 ### Krok 15: Performance optimization
 
 **Zadania:**
+
 1. Lazy loading Plyr (tylko gdy potrzebny)
 2. Preload thumbnail w `<link rel="preload">`
 3. Optymalizacja obrazków (WebP, lazy loading)
@@ -1508,6 +1615,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 5. Memoization (`useMemo`, `useCallback` gdzie potrzebne)
 
 **Weryfikacja:**
+
 - Lighthouse Performance score ≥ 85
 - First Contentful Paint < 2s
 - Time to Interactive < 3s
@@ -1518,6 +1626,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 ### Krok 16: Finalizacja i dokumentacja
 
 **Zadania:**
+
 1. Code review (jeśli zespół)
 2. Dokumentacja komponentów (JSDoc comments)
 3. Update README jeśli potrzebne
@@ -1525,6 +1634,7 @@ const userRole = session?.user?.user_metadata?.role || null;
 5. Merge do main branch
 
 **Weryfikacja:**
+
 - Kod jest czytelny i dobrze udokumentowany
 - Wszystkie komponenty mają TypeScript types
 - Brak warning w konsoli

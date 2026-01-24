@@ -4,7 +4,7 @@
 **Wersja:** 1.1 (zaktualizowana po weryfikacji zgodności z PRD)  
 **Data:** 22 stycznia 2026  
 **Autor:** Full-stack Developer  
-**Status:** Zweryfikowana zgodność z PRD - Gotowa do implementacji  
+**Status:** Zweryfikowana zgodność z PRD - Gotowa do implementacji
 
 ---
 
@@ -40,6 +40,7 @@ Niniejsza specyfikacja opisuje szczegółową architekturę modułu autentykacji
 ### 1.3 Istniejąca Implementacja
 
 **Aktualnie zaimplementowane elementy:**
+
 - `src/lib/hooks/useAuth.ts` - React hook do zarządzania stanem autentykacji client-side
 - `src/components/AuthButton.tsx` - Komponent UI dla login/logout
 - `src/lib/utils/auth.utils.ts` - Utility functions dla server-side auth
@@ -47,6 +48,7 @@ Niniejsza specyfikacja opisuje szczegółową architekturę modułu autentykacji
 - `src/db/supabase.client.ts` - Klient Supabase dla client-side
 
 **Co wymaga rozbudowy:**
+
 - Brak dedykowanych stron dla auth flow (login, callback, error)
 - Brak kompleksowej obsługi **invite callback**
 - Brak kompleksowej obsługi magic link callback
@@ -75,7 +77,8 @@ src/pages/
 **A. `/auth/login.astro` - Strona Logowania (Dla Istniejących Użytkowników)**
 
 **Odpowiedzialność:**
-- Server-side: 
+
+- Server-side:
   - Sprawdzenie czy użytkownik jest już zalogowany (redirect do `/` jeśli tak)
   - Renderowanie Layout z formularzem logowania
 - Client-side (React):
@@ -85,6 +88,7 @@ src/pages/
   - **Informacja dla nowych użytkowników** o konieczności invite
 
 **Struktura:**
+
 ```typescript
 // auth/login.astro (pseudo-kod struktury)
 ---
@@ -113,9 +117,9 @@ const redirectTo = Astro.url.searchParams.get("redirect") || "/";
           Wyślemy Ci link logowania na email
         </p>
       </div>
-      
+
       <LoginForm client:load redirectTo={redirectTo} />
-      
+
       <!-- Info dla nowych użytkowników -->
       <div class="text-center text-sm text-muted-foreground border-t pt-4">
         <p>Nie masz jeszcze konta?</p>
@@ -129,12 +133,14 @@ const redirectTo = Astro.url.searchParams.get("redirect") || "/";
 ```
 
 **Kluczowa różnica vs PRD:**
+
 - Strona informuje nowych użytkowników że potrzebują invite (zgodnie z US-05)
 - Self-service registration NIE jest możliwa (zgodnie z PRD)
 
 **B. `/auth/callback.astro` - Magic Link Callback**
 
 **Odpowiedzialność:**
+
 - Server-side:
   - Wyciągnięcie token z URL hash/query params
   - Wymiana token na sesję (Supabase Auth)
@@ -144,6 +150,7 @@ const redirectTo = Astro.url.searchParams.get("redirect") || "/";
   - Redirect do `/auth/error` z odpowiednim kodem błędu
 
 **Struktura:**
+
 ```typescript
 // auth/callback.astro (pseudo-kod)
 ---
@@ -191,11 +198,13 @@ return Astro.redirect(redirectTo);
 **C. `/auth/verify-email.astro` - Potwierdzenie Wysłania Email**
 
 **Odpowiedzialność:**
+
 - Wyświetlenie informacji o wysłaniu magic link
 - Instrukcje dla użytkownika (sprawdź spam, itp.)
 - Link do ponownego wysłania
 
 **Struktura:**
+
 ```typescript
 // auth/verify-email.astro
 ---
@@ -215,12 +224,12 @@ const email = Astro.url.searchParams.get("email") || "";
         </p>
         <p class="font-semibold text-lg">{email}</p>
       </div>
-      
+
       <div class="space-y-4">
         <p class="text-sm text-muted-foreground">
           Kliknij w link w emailu, aby się zalogować. Link jest ważny przez 60 minut.
         </p>
-        
+
         <div class="bg-muted/50 rounded-lg p-4 text-sm text-left space-y-1">
           <p class="font-semibold">Nie widzisz emaila?</p>
           <ul class="list-disc list-inside space-y-1 text-muted-foreground">
@@ -229,9 +238,9 @@ const email = Astro.url.searchParams.get("email") || "";
             <li>Poczekaj kilka minut - czasami email może się opóźnić</li>
           </ul>
         </div>
-        
+
         <ResendEmailButton client:load email={email} />
-        
+
         <a href="/auth/login" class="text-sm text-primary hover:underline inline-block">
           ← Wróć do logowania
         </a>
@@ -244,11 +253,13 @@ const email = Astro.url.searchParams.get("email") || "";
 **D. `/auth/error.astro` - Strona Błędu Autentykacji**
 
 **Odpowiedzialność:**
+
 - Wyświetlenie użytkownikowi przyjaznego komunikatu błędu
 - Różne komunikaty w zależności od kodu błędu
 - Link powrotny do logowania
 
 **Struktura:**
+
 ```typescript
 // auth/error.astro
 ---
@@ -291,7 +302,7 @@ const error = errorMessages[errorCode] || errorMessages.unknown;
         <h1 class="text-2xl font-bold">{error.title}</h1>
         <p class="text-muted-foreground">{error.description}</p>
       </div>
-      
+
       <a href="/auth/login">
         <Button>Przejdź do logowania</Button>
       </a>
@@ -313,6 +324,7 @@ src/components/auth/
 **A. `LoginForm.tsx` - Formularz Logowania (Tylko dla Existing Users)**
 
 **Odpowiedzialność:**
+
 - Wyświetlenie pola input dla email
 - Walidacja email po stronie klienta (Zod + React Hook Form)
 - Wysłanie request do Supabase Auth (magic link dla istniejących użytkowników)
@@ -322,26 +334,24 @@ src/components/auth/
 - **Jednolity komunikat sukcesu** niezależnie czy email istnieje (email enumeration prevention)
 
 **Interfejs:**
+
 ```typescript
 interface LoginFormProps {
-  redirectTo?: string;  // URL do przekierowania po zalogowaniu
+  redirectTo?: string; // URL do przekierowania po zalogowaniu
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
 
 // Zod schema dla walidacji
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email jest wymagany")
-    .email("Podaj prawidłowy adres email")
-    .max(255, "Email jest za długi")
+  email: z.string().min(1, "Email jest wymagany").email("Podaj prawidłowy adres email").max(255, "Email jest za długi"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 ```
 
 **Kluczowe metody:**
+
 ```typescript
 async function handleSubmit(data: LoginFormData) {
   // 1. Walidacja (React Hook Form + Zod)
@@ -352,6 +362,7 @@ async function handleSubmit(data: LoginFormData) {
 ```
 
 **Stany UI:**
+
 - **Idle:** Formularz gotowy do wprowadzenia danych
 - **Loading:** Spinner + disabled inputs podczas wysyłania
 - **Error:** Wyświetlenie błędu pod inputem lub jako toast
@@ -360,11 +371,13 @@ async function handleSubmit(data: LoginFormData) {
 **B. `GoogleAuthButton.tsx` - Google OAuth**
 
 **Odpowiedzialność:**
+
 - Przycisk "Kontynuuj z Google"
 - Wywołanie Supabase Auth signInWithOAuth
 - Obsługa błędów OAuth flow
 
 **Interfejs:**
+
 ```typescript
 interface GoogleAuthButtonProps {
   redirectTo?: string;
@@ -380,11 +393,13 @@ async function handleGoogleLogin() {
 **C. `ResendEmailButton.tsx` - Ponowne Wysłanie Magic Link**
 
 **Odpowiedzialność:**
+
 - Przycisk z throttling (np. 60s cooldown)
 - Ponowne wywołanie signInWithOtp
 - Wyświetlenie countdown timera
 
 **Interfejs:**
+
 ```typescript
 interface ResendEmailButtonProps {
   email: string;
@@ -397,11 +412,13 @@ interface ResendEmailButtonProps {
 **D. `AuthGuard.tsx` - Component dla Protected Content**
 
 **Odpowiedzialność:**
+
 - Wrapper component sprawdzający autentykację
 - Dla niezalogowanych: wyświetla komunikat lub przekierowuje
 - Opcjonalnie: sprawdzenie roli (role-based guard)
 
 **Interfejs:**
+
 ```typescript
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -421,18 +438,21 @@ interface AuthGuardProps {
 **A. Rozszerzenie `src/components/AuthButton.tsx`**
 
 **Aktualne funkcjonalności:**
+
 - Wyświetlanie przycisku "Zaloguj się" dla niezalogowanych
 - Avatar + dropdown menu dla zalogowanych
 - Badge z rolą użytkownika
 - Przycisk "Wyloguj się"
 
 **Wymagane zmiany:**
+
 - Zamienić `prompt()` na redirect do `/auth/login`
 - Dodać obsługę loading state podczas wylogowywania
 - Dodać toast notification po wylogowaniu
 - Opcjonalnie: pokazać menu z linkiem do profilu (future)
 
 **Nowa implementacja metody `signIn`:**
+
 ```typescript
 const signIn = () => {
   // Zamiast prompt(), redirect do strony logowania
@@ -443,12 +463,14 @@ const signIn = () => {
 **B. Rozszerzenie `src/lib/hooks/useAuth.ts`**
 
 **Aktualne funkcjonalności:**
+
 - Inicjalizacja Supabase client
 - Pobranie sesji użytkownika
 - Listener na zmiany auth state
 - Metody: signIn (prompt), signOut
 
 **Wymagane zmiany:**
+
 - Usunąć prompt() z signIn - to będzie tylko redirect
 - Dodać metodę `signInWithMagicLink(email: string)`
 - Dodać metodę `signInWithGoogle()`
@@ -457,6 +479,7 @@ const signIn = () => {
 - Dodać revalidation po powrocie na tab (visibility change)
 
 **Nowy interfejs:**
+
 ```typescript
 interface UseAuthResult {
   user: SupabaseUser | null;
@@ -473,6 +496,7 @@ interface UseAuthResult {
 **C. Rozszerzenie `src/components/Navbar.astro`**
 
 **Wymagane zmiany:**
+
 - Brak - navbar już używa AuthButton
 - Opcjonalnie: dodać link do profilu w przyszłości
 
@@ -481,26 +505,25 @@ interface UseAuthResult {
 **A. Rozszerzenie `/video/[id].astro`**
 
 **Aktualna implementacja:**
+
 - Pobiera sesję na serwerze
 - Ekstraktuje rolę z user_metadata
 - Przekazuje `userRole` do VideoPlayerContainer
 
 **Wymagane zmiany:**
+
 - Dodać redirect do `/auth/login` dla premium content gdy user nie zalogowany
 - Ulepszony error handling
 - Breadcrumb z informacją o wymaganej roli
 
 **Nowa logika:**
+
 ```typescript
 // video/[id].astro (fragment server-side logic)
 const supabase = Astro.locals.supabase;
 
 // Fetch video metadata (potrzebne przed auth check)
-const { data: video } = await supabase
-  .from("videos")
-  .select("*")
-  .eq("id", id)
-  .single();
+const { data: video } = await supabase.from("videos").select("*").eq("id", id).single();
 
 if (!video) {
   return Astro.redirect("/404");
@@ -508,17 +531,19 @@ if (!video) {
 
 // Check auth only for premium content
 if (video.is_premium) {
-  const { data: { session } } = await supabase.auth.getSession();
-  
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
   if (!session) {
     // Redirect to login with return URL
     const returnUrl = encodeURIComponent(`/video/${id}`);
     return Astro.redirect(`/auth/login?redirect=${returnUrl}`);
   }
-  
+
   // Check role
   const userRole = session.user.user_metadata?.role || "free";
-  
+
   if (userRole !== "premium" && userRole !== "admin") {
     // Show premium gate (already implemented in VideoPlayerContainer)
     // No redirect - show gate UI
@@ -531,6 +556,7 @@ if (video.is_premium) {
 #### 2.2.1 Walidacja Client-Side (React Hook Form + Zod)
 
 **Email Validation Schema:**
+
 ```typescript
 // src/lib/validators/auth.validator.ts
 
@@ -541,18 +567,19 @@ export const emailSchema = z.object({
     .email("Podaj prawidłowy adres email")
     .max(255, "Email jest za długi")
     .toLowerCase()
-    .trim()
+    .trim(),
 });
 
 export const loginSchema = emailSchema;
 
 // Future: password reset schema
 export const resetPasswordSchema = z.object({
-  email: emailSchema.shape.email
+  email: emailSchema.shape.email,
 });
 ```
 
 **React Hook Form Integration:**
+
 ```typescript
 // W LoginForm.tsx
 import { useForm } from "react-hook-form";
@@ -561,9 +588,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 const {
   register,
   handleSubmit,
-  formState: { errors, isSubmitting }
+  formState: { errors, isSubmitting },
 } = useForm<LoginFormData>({
-  resolver: zodResolver(loginSchema)
+  resolver: zodResolver(loginSchema),
 });
 ```
 
@@ -589,11 +616,13 @@ const {
    - Supabase nie skonfigurowany: "⚠️ Supabase nie jest skonfigurowany. Zobacz ENV_SETUP.md."
 
 **Prezentacja błędów:**
+
 - Błędy walidacji: Inline pod inputem (czerwony text)
 - Błędy auth/systemowe: Toast notification (Sonner)
 - Błędy strony: Dedykowana strona `/auth/error`
 
 **Poziomy severity:**
+
 - **Error (czerwony):** Błędy blokujące akcję
 - **Warning (żółty):** Ostrzeżenia (np. email może trafić do spam)
 - **Info (niebieski):** Informacje (np. "Link wysłany")
@@ -624,6 +653,7 @@ const {
 #### Scenariusz 1: Nowy Użytkownik - Invite Flow (Zgodnie z US-05)
 
 **Flow (zgodnie z PRD sekcja 7.1):**
+
 1. User wchodzi na `/` (niezalogowany)
 2. Ogląda darmowe treści, próbuje otworzyć premium content
 3. Widzi komunikat w PremiumGate: "Skontaktuj się z [email] aby uzyskać dostęp"
@@ -642,11 +672,13 @@ const {
 11. User ma dostęp zgodny ze swoją rolą
 
 **Error paths:**
+
 - Link wygasł → Redirect do `/auth/error?code=invalid_token`
 - Email już istnieje → Supabase obsługuje (może użyć magic link zamiast)
 - Brak metadanych role → Default do "free"
 
 **Ważne:**
+
 - Nowi użytkownicy **NIE MOGĄ** sami się rejestrować
 - Jedyna droga: zaproszenie od admina (US-05)
 - Zabezpiecza przed spam/unwanted users
@@ -654,6 +686,7 @@ const {
 #### Scenariusz 2: Powracający Użytkownik - Magic Link Login (US-06)
 
 **Flow (dla istniejących użytkowników):**
+
 1. User wchodzi na `/` (niezalogowany, ale ma już konto w systemie)
 2. Klika "Zaloguj się" w navbar
 3. → Redirect do `/auth/login`
@@ -669,22 +702,26 @@ const {
 11. Navbar pokazuje avatar + rolę
 
 **Error paths:**
+
 - Email nie istnieje w bazie → **Jednolity komunikat** "Link wysłany" (email enumeration prevention)
   - W rzeczywistości: email nie zostaje wysłany, ale user tego nie wie (security)
 - Link wygasł → Redirect do `/auth/error?code=invalid_token`
 - Supabase down → Toast: "Wystąpił błąd serwera..."
 
 **Optymalizacja:**
+
 - Jeśli user ma valid session cookie, auto-login (bez potrzeby logowania)
 - Session refresh na visibility change (user wraca na tab)
 
 **Uwaga bezpieczeństwa:**
+
 - Strona `/auth/login` pokazuje ten sam komunikat sukcesu niezależnie czy email istnieje
 - Zapobiega to Email Enumeration Attack (sprawdzaniu czy email ma konto)
 
 #### Scenariusz 3: Logowanie przez Google OAuth
 
 **Flow:**
+
 1. User na `/auth/login`
 2. Klika "Kontynuuj z Google"
 3. → Supabase redirect do Google OAuth
@@ -695,12 +732,14 @@ const {
 8. → Redirect do `/`
 
 **Error paths:**
+
 - User odmawia w Google → Redirect do `/auth/error?code=access_denied`
 - Google OAuth error → Error page z komunikatem
 
 #### Scenariusz 4: Dostęp do Premium Content - Niezalogowany
 
 **Flow:**
+
 1. User (niezalogowany) wchodzi na `/video/{premium-id}`
 2. Server sprawdza `video.is_premium === true`
 3. Server sprawdza `session === null`
@@ -712,16 +751,19 @@ const {
 #### Scenariusz 5: Dostęp do Premium Content - Free User
 
 **Flow:**
+
 1. User (zalogowany, rola: free) wchodzi na `/video/{premium-id}`
 2. Server sprawdza `session.user.user_metadata.role === "free"`
 3. Strona renderuje się, ale VideoPlayerContainer pokazuje `<PremiumGate />`
 4. User widzi komunikat: "Ta treść jest dostępna tylko dla użytkowników premium. Skontaktuj się z [email], aby uzyskać dostęp."
 
 **Już zaimplementowane w:**
+
 - `src/components/video-player/PremiumGate.tsx`
 - `src/components/video-player/VideoPlayerContainer.tsx`
 
 **Uwaga:**
+
 - PremiumGate powinien zawierać kontaktowy email admina
 - User może poprosić admina o upgrade roli free → premium
 - Admin zmienia rolę w Supabase Dashboard (sekcja 4.3.2)
@@ -729,6 +771,7 @@ const {
 #### Scenariusz 6: Wylogowanie
 
 **Flow:**
+
 1. User (zalogowany) klika avatar w navbar
 2. Dropdown menu → "Wyloguj się"
 3. Call `supabase.auth.signOut()`
@@ -740,6 +783,7 @@ const {
 #### Scenariusz 7: Session Expiry - Auto Refresh
 
 **Flow:**
+
 1. User jest zalogowany, session wygasa po 1h (Supabase default)
 2. `useAuth` hook wykrywa expired session
 3. Automatyczny refresh przez `supabase.auth.refreshSession()`
@@ -747,12 +791,14 @@ const {
 5. Jeśli fail → user wylogowany, redirect do `/auth/login`
 
 **Implementacja:**
+
 - `useAuth` hook z `useEffect` na visibility change
 - Refresh token jest valid przez 30 dni
 
 #### Scenariusz 8: Ponowne Wysłanie Magic Link
 
 **Flow:**
+
 1. User na `/auth/verify-email`
 2. Kliknięcie "Wyślij link ponownie"
 3. Throttling check (60s)
@@ -763,6 +809,7 @@ const {
 #### Scenariusz 9: Upgrade Roli Free → Premium (Manual by Admin)
 
 **Flow (zgodnie z PRD - brak płatności online):**
+
 1. User (zalogowany, rola: free) chce dostęp do premium content
 2. Widzi komunikat w PremiumGate z kontaktowym emailem
 3. User kontaktuje się z adminem (email/social)
@@ -781,6 +828,7 @@ const {
 8. User ma natychmiastowy dostęp do premium content
 
 **Automatyczna propagacja nowej roli:**
+
 - Supabase JWT zawiera user_metadata
 - Przy następnym auth check (middleware) - nowa rola jest wykrywana
 - Dla natychmiastowej zmiany: user może odświeżyć stronę lub poczekać na auto session refresh
@@ -799,25 +847,26 @@ Supabase dostarcza gotowe endpointy poprzez SDK:
 
 ```typescript
 // Magic Link
-await supabase.auth.signInWithOtp({ email })
+await supabase.auth.signInWithOtp({ email });
 
 // OAuth
-await supabase.auth.signInWithOAuth({ provider: 'google' })
+await supabase.auth.signInWithOAuth({ provider: "google" });
 
 // Sign Out
-await supabase.auth.signOut()
+await supabase.auth.signOut();
 
 // Get Session
-await supabase.auth.getSession()
+await supabase.auth.getSession();
 
 // Refresh Session
-await supabase.auth.refreshSession()
+await supabase.auth.refreshSession();
 
 // Get User
-await supabase.auth.getUser()
+await supabase.auth.getUser();
 ```
 
 **Callback URL Configuration (Supabase Dashboard):**
+
 - **Site URL:** `https://yourdomain.com`
 - **Redirect URLs:**
   - `https://yourdomain.com/auth/callback`
@@ -836,6 +885,7 @@ src/pages/api/auth/
 **Cel:** Endpoint do sprawdzenia czy użytkownik ma aktywną sesję (dla client-side checks)
 
 **Request:**
+
 ```typescript
 GET /api/auth/session
 Headers:
@@ -843,6 +893,7 @@ Headers:
 ```
 
 **Response (Success):**
+
 ```typescript
 {
   "authenticated": true,
@@ -855,6 +906,7 @@ Headers:
 ```
 
 **Response (Unauthenticated):**
+
 ```typescript
 {
   "authenticated": false,
@@ -863,30 +915,34 @@ Headers:
 ```
 
 **Implementacja:**
+
 ```typescript
 // src/pages/api/auth/session.ts
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ locals }) => {
   const supabase = locals.supabase;
-  
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
   if (error || !user) {
-    return new Response(
-      JSON.stringify({ authenticated: false, user: null }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ authenticated: false, user: null }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }
-  
+
   return new Response(
     JSON.stringify({
       authenticated: true,
       user: {
         id: user.id,
         email: user.email,
-        role: user.user_metadata?.role || "free"
-      }
+        role: user.user_metadata?.role || "free",
+      },
     }),
     { status: 200, headers: { "Content-Type": "application/json" } }
   );
@@ -900,6 +956,7 @@ export const prerender = false;
 **Cel:** Endpoint z rate limiting do ponownego wysłania magic link
 
 **Request:**
+
 ```typescript
 POST /api/auth/verify-email
 Content-Type: application/json
@@ -910,6 +967,7 @@ Content-Type: application/json
 ```
 
 **Response (Success):**
+
 ```typescript
 {
   "success": true,
@@ -918,6 +976,7 @@ Content-Type: application/json
 ```
 
 **Response (Rate Limited):**
+
 ```typescript
 {
   "success": false,
@@ -926,6 +985,7 @@ Content-Type: application/json
 ```
 
 **Implementacja:**
+
 ```typescript
 // src/pages/api/auth/verify-email.ts
 import type { APIRoute } from "astro";
@@ -938,57 +998,56 @@ const RATE_LIMIT_WINDOW = 60000; // 60 seconds
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const supabase = locals.supabase;
-  
+
   try {
     // Parse and validate request body
     const body = await request.json();
     const { email } = emailSchema.parse(body);
-    
+
     // Rate limiting check
     const lastRequest = rateLimitStore.get(email);
     const now = Date.now();
-    
+
     if (lastRequest && now - lastRequest < RATE_LIMIT_WINDOW) {
       const waitTime = Math.ceil((RATE_LIMIT_WINDOW - (now - lastRequest)) / 1000);
       return new Response(
         JSON.stringify({
           success: false,
-          error: `Rate limit exceeded. Spróbuj ponownie za ${waitTime} sekund.`
+          error: `Rate limit exceeded. Spróbuj ponownie za ${waitTime} sekund.`,
         }),
         { status: 429, headers: { "Content-Type": "application/json" } }
       );
     }
-    
+
     // Send magic link
     const { error } = await supabase.auth.signInWithOtp({ email });
-    
+
     if (error) {
-      return new Response(
-        JSON.stringify({ success: false, error: error.message }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ success: false, error: error.message }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    
+
     // Update rate limit store
     rateLimitStore.set(email, now);
-    
-    return new Response(
-      JSON.stringify({ success: true, message: "Link wysłany ponownie" }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-    
+
+    return new Response(JSON.stringify({ success: true, message: "Link wysłany ponownie" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return new Response(
-        JSON.stringify({ success: false, error: error.errors[0].message }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ success: false, error: error.errors[0].message }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    
-    return new Response(
-      JSON.stringify({ success: false, error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+
+    return new Response(JSON.stringify({ success: false, error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };
 
@@ -1000,15 +1059,18 @@ export const prerender = false;
 #### 3.2.1 Rozszerzenie `src/middleware/index.ts`
 
 **Aktualna implementacja:**
+
 - Dodaje `supabaseClient` do `context.locals.supabase`
 
 **Wymagane rozszerzenie:**
+
 - Weryfikacja sesji dla każdego request
 - Ustawienie user context w locals
 - Refresh expired sessions (jeśli możliwe)
 - Logowanie auth events (opcjonalnie)
 
 **Nowa implementacja:**
+
 ```typescript
 // src/middleware/index.ts
 import { defineMiddleware } from "astro:middleware";
@@ -1033,32 +1095,35 @@ export const onRequest = defineMiddleware(async (context, next) => {
             httpOnly: true,
             secure: import.meta.env.PROD,
             sameSite: "lax",
-            maxAge: 60 * 60 * 24 * 30 // 30 days
+            maxAge: 60 * 60 * 24 * 30, // 30 days
           });
         },
         removeItem: (key) => {
           context.cookies.delete(key);
-        }
-      }
-    }
+        },
+      },
+    },
   });
-  
+
   // Attach supabase to locals
   context.locals.supabase = supabase;
-  
+
   // Get session (this also refreshes if needed)
-  const { data: { session } } = await supabase.auth.getSession();
-  
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
   // Attach user to locals for easy access in routes
   context.locals.user = session?.user || null;
   context.locals.userRole = session?.user?.user_metadata?.role || null;
-  
+
   // Continue to next middleware/route
   return next();
 });
 ```
 
 **Typy dla locals (src/env.d.ts):**
+
 ```typescript
 // src/env.d.ts
 /// <reference types="astro/client" />
@@ -1092,33 +1157,30 @@ import type { UserRole } from "@/types";
  */
 export async function requireAuth(Astro: AstroGlobal): Promise<boolean> {
   const user = Astro.locals.user;
-  
+
   if (!user) {
     const returnUrl = encodeURIComponent(Astro.url.pathname + Astro.url.search);
     return Astro.redirect(`/auth/login?redirect=${returnUrl}`) as never;
   }
-  
+
   return true;
 }
 
 /**
  * Redirect to login or error page if user doesn't have required role
  */
-export async function requireRole(
-  Astro: AstroGlobal,
-  requiredRoles: UserRole | UserRole[]
-): Promise<boolean> {
+export async function requireRole(Astro: AstroGlobal, requiredRoles: UserRole | UserRole[]): Promise<boolean> {
   // First check auth
   await requireAuth(Astro);
-  
+
   const userRole = Astro.locals.userRole || "free";
   const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
-  
+
   if (!roles.includes(userRole)) {
     // User is authenticated but doesn't have required role
     return Astro.redirect("/auth/error?code=access_denied") as never;
   }
-  
+
   return true;
 }
 
@@ -1128,13 +1190,14 @@ export async function requireRole(
 export function hasRole(Astro: AstroGlobal, role: UserRole | UserRole[]): boolean {
   const userRole = Astro.locals.userRole;
   if (!userRole) return false;
-  
+
   const roles = Array.isArray(role) ? role : [role];
   return roles.includes(userRole);
 }
 ```
 
 **Użycie w protected routes:**
+
 ```typescript
 // Example: /admin/dashboard.astro
 ---
@@ -1166,14 +1229,14 @@ export const emailSchema = z.object({
     .max(255, "Email jest za długi")
     .email("Podaj prawidłowy adres email")
     .toLowerCase()
-    .trim()
+    .trim(),
 });
 
 /**
  * Login form schema (magic link)
  */
 export const loginSchema = emailSchema.extend({
-  redirectTo: z.string().url().optional()
+  redirectTo: z.string().url().optional(),
 });
 
 /**
@@ -1181,9 +1244,9 @@ export const loginSchema = emailSchema.extend({
  */
 export const oauthSchema = z.object({
   provider: z.enum(["google"], {
-    errorMap: () => ({ message: "Nieobsługiwany provider" })
+    errorMap: () => ({ message: "Nieobsługiwany provider" }),
   }),
-  redirectTo: z.string().url().optional()
+  redirectTo: z.string().url().optional(),
 });
 
 /**
@@ -1192,7 +1255,7 @@ export const oauthSchema = z.object({
 export const callbackSchema = z.object({
   token_hash: z.string().min(1, "Token is required"),
   type: z.enum(["magiclink", "recovery", "invite"]),
-  redirect: z.string().optional()
+  redirect: z.string().optional(),
 });
 
 // Export types
@@ -1233,12 +1296,12 @@ export class AuthorizationError extends Error {
 
 // Error code mappings dla Supabase errors
 export const AUTH_ERROR_MESSAGES: Record<string, string> = {
-  "invalid_credentials": "Nieprawidłowy email lub hasło",
-  "email_not_confirmed": "Email nie został potwierdzony",
-  "user_not_found": "Nie znaleziono użytkownika z tym adresem email",
-  "invalid_grant": "Link logowania wygasł lub jest nieprawidłowy",
-  "over_email_send_rate_limit": "Za dużo prób logowania. Spróbuj ponownie za kilka minut.",
-  "provider_email_needs_verification": "Email wymaga weryfikacji"
+  invalid_credentials: "Nieprawidłowy email lub hasło",
+  email_not_confirmed: "Email nie został potwierdzony",
+  user_not_found: "Nie znaleziono użytkownika z tym adresem email",
+  invalid_grant: "Link logowania wygasł lub jest nieprawidłowy",
+  over_email_send_rate_limit: "Za dużo prób logowania. Spróbuj ponownie za kilka minut.",
+  provider_email_needs_verification: "Email wymaga weryfikacji",
 };
 
 export function getAuthErrorMessage(error: unknown): string {
@@ -1271,20 +1334,20 @@ export function createErrorResponse(
     error: {
       code,
       message,
-      details
-    }
+      details,
+    },
   };
-  
+
   return new Response(JSON.stringify(errorResponse), {
     status: statusCode,
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
 }
 
 export function createSuccessResponse<T>(data: T, statusCode: number = 200): Response {
   return new Response(JSON.stringify(data), {
     status: statusCode,
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
 }
 ```
@@ -1306,7 +1369,7 @@ export function logAuthEvent(event: AuthEvent): void {
   if (import.meta.env.DEV) {
     console.log("[Auth Event]", event);
   }
-  
+
   // Production: Send to analytics/monitoring service
   // e.g., Sentry, LogRocket, Supabase Analytics
 }
@@ -1357,6 +1420,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 4. **Email Templates:**
    - **Magic Link Email:**
+
      ```html
      <h2>Zaloguj się do YogaFit</h2>
      <p>Kliknij poniższy link, aby się zalogować:</p>
@@ -1404,12 +1468,12 @@ export function createServerClient(
       storage: {
         getItem: cookieGetter,
         setItem: cookieSetter,
-        removeItem: cookieRemover
+        removeItem: cookieRemover,
       },
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true
-    }
+      detectSessionInUrl: true,
+    },
   });
 }
 ```
@@ -1433,18 +1497,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * Client-side Supabase client
  * Used in React components and hooks
  */
-export const supabaseClient = createClient<Database>(
-  supabaseUrl || "",
-  supabaseAnonKey || "",
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-      storage: window?.localStorage // Use localStorage for client-side
-    }
-  }
-);
+export const supabaseClient = createClient<Database>(supabaseUrl || "", supabaseAnonKey || "", {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    storage: window?.localStorage, // Use localStorage for client-side
+  },
+});
 
 // Type export for use in components
 export type SupabaseClient = typeof supabaseClient;
@@ -1471,9 +1531,11 @@ interface UserMetadata {
 #### 4.3.2 Ustawianie Roli Użytkownika (Admin Task)
 
 **Przez Supabase Dashboard:**
+
 1. Authentication → Users
 2. Wybierz użytkownika
 3. User Metadata → Raw JSON:
+
 ```json
 {
   "role": "premium",
@@ -1482,6 +1544,7 @@ interface UserMetadata {
 ```
 
 **Przez SQL (zaawansowane):**
+
 ```sql
 -- Update user metadata via SQL
 UPDATE auth.users
@@ -1490,6 +1553,7 @@ WHERE email = 'user@example.com';
 ```
 
 **Przez Supabase Dashboard (Primary Method - zgodnie z US-05):**
+
 1. Authentication → Users → Invite user
 2. Wpisz email nowego użytkownika
 3. W sekcji User Metadata dodaj:
@@ -1504,21 +1568,20 @@ WHERE email = 'user@example.com';
 6. Po kliknięciu linku - konto utworzone z przypisaną rolą
 
 **Przez Supabase Admin API (automated invite system - future):**
+
 ```typescript
 // Example: Automated invite with role assignment
-const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-  "newuser@example.com",
-  {
-    data: {
-      role: "premium",
-      display_name: "New User"
-    },
-    redirectTo: "https://yourdomain.com/auth/callback"
-  }
-);
+const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail("newuser@example.com", {
+  data: {
+    role: "premium",
+    display_name: "New User",
+  },
+  redirectTo: "https://yourdomain.com/auth/callback",
+});
 ```
 
 **Uwaga:**
+
 - **ZAWSZE** ustawiaj rolę podczas invite (default: "free" jeśli brak)
 - Rola jest dostępna w `auth.jwt() -> 'user_metadata' ->> 'role'` w RLS policies
 
@@ -1608,15 +1671,18 @@ WITH CHECK (
 #### 4.5.1 Session Lifecycle
 
 **Session Duration:**
+
 - Access token expiry: **1 hour** (Supabase default)
 - Refresh token expiry: **30 days** (Supabase default)
 
 **Refresh Strategy:**
+
 1. **Automatic refresh (Supabase SDK):**
    - SDK automatycznie odnawia session przed wygaśnięciem
    - Używa refresh token przechowywanego w cookie/localStorage
 
 2. **Manual refresh (w useAuth hook):**
+
 ```typescript
 // W useAuth hook - refresh on visibility change
 useEffect(() => {
@@ -1625,7 +1691,7 @@ useEffect(() => {
       supabase.auth.refreshSession();
     }
   };
-  
+
   document.addEventListener("visibilitychange", handleVisibilityChange);
   return () => {
     document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -1634,18 +1700,23 @@ useEffect(() => {
 ```
 
 3. **Session verification na server-side:**
+
 ```typescript
 // W middleware - session jest weryfikowana przy każdym request
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 ```
 
 #### 4.5.2 Cookie Configuration
 
 **Cookies ustawiane przez Supabase:**
+
 - `sb-access-token` - JWT access token
 - `sb-refresh-token` - Refresh token
 
 **Parametry (ustawiane w middleware):**
+
 ```typescript
 {
   path: "/",
@@ -1671,14 +1742,14 @@ const { data: { session } } = await supabase.auth.getSession();
 
 #### 4.6.2 Potencjalne Zagrożenia i Mitigacje
 
-| Zagrożenie | Opis | Mitigacja |
-|------------|------|-----------|
-| **XSS (Cross-Site Scripting)** | Injection złośliwego JS | HttpOnly cookies, CSP headers, input sanitization |
-| **CSRF (Cross-Site Request Forgery)** | Nieautoryzowane requesty | SameSite cookies, origin checks |
-| **Session Hijacking** | Kradzież session token | HTTPS only, short token expiry, IP validation (optional) |
-| **Brute Force Login** | Wielokrotne próby logowania | Rate limiting na email endpoint |
-| **Email Enumeration** | Sprawdzanie czy email istnieje | Jednolite komunikaty błędów ("Link wysłany" nawet jeśli email nie istnieje) |
-| **Token Replay** | Ponowne użycie starego tokenu | Token jednorazowy (Supabase default) |
+| Zagrożenie                            | Opis                           | Mitigacja                                                                   |
+| ------------------------------------- | ------------------------------ | --------------------------------------------------------------------------- |
+| **XSS (Cross-Site Scripting)**        | Injection złośliwego JS        | HttpOnly cookies, CSP headers, input sanitization                           |
+| **CSRF (Cross-Site Request Forgery)** | Nieautoryzowane requesty       | SameSite cookies, origin checks                                             |
+| **Session Hijacking**                 | Kradzież session token         | HTTPS only, short token expiry, IP validation (optional)                    |
+| **Brute Force Login**                 | Wielokrotne próby logowania    | Rate limiting na email endpoint                                             |
+| **Email Enumeration**                 | Sprawdzanie czy email istnieje | Jednolite komunikaty błędów ("Link wysłany" nawet jeśli email nie istnieje) |
+| **Token Replay**                      | Ponowne użycie starego tokenu  | Token jednorazowy (Supabase default)                                        |
 
 ---
 
@@ -1689,19 +1760,23 @@ const { data: { session } } = await supabase.auth.getSession();
 #### 5.1.1 VideoPlayerContainer
 
 **Aktualna logika:**
+
 - Przyjmuje `userRole` jako prop
 - Jeśli video premium i user free → pokazuje `<PremiumGate />`
 
 **Wymagane zmiany:**
+
 - Brak - komponent już obsługuje premium gating poprawnie
 - Opcjonalnie: dodać retry logic jeśli failed auth check
 
 #### 5.1.2 Navbar
 
 **Aktualna implementacja:**
+
 - Używa `<AuthButton client:load />`
 
 **Wymagane zmiany:**
+
 - Brak - navbar już korzysta z komponentu AuthButton
 - Future: Dodać dropdown links (Profile, Settings)
 
@@ -1710,6 +1785,7 @@ const { data: { session } } = await supabase.auth.getSession();
 **Przykład: `/api/videos/[id].ts`**
 
 **Dodanie auth check:**
+
 ```typescript
 // src/pages/api/videos/[id].ts (fragment)
 import { requireAuth, getUserRole } from "@/lib/utils/auth.utils";
@@ -1717,24 +1793,20 @@ import { requireAuth, getUserRole } from "@/lib/utils/auth.utils";
 export const GET: APIRoute = async ({ params, locals }) => {
   const supabase = locals.supabase;
   const { id } = params;
-  
+
   // Fetch video
-  const { data: video, error } = await supabase
-    .from("videos")
-    .select("*")
-    .eq("id", id)
-    .single();
-  
+  const { data: video, error } = await supabase.from("videos").select("*").eq("id", id).single();
+
   if (error || !video) {
     return createErrorResponse("VIDEO_NOT_FOUND", "Video not found", 404);
   }
-  
+
   // Auth check for premium content
   if (video.is_premium) {
     try {
       await requireAuth(supabase);
       const role = await getUserRole(supabase);
-      
+
       if (role !== "premium" && role !== "admin") {
         return createErrorResponse("FORBIDDEN", "Premium access required", 403);
       }
@@ -1742,7 +1814,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       return createErrorResponse("UNAUTHORIZED", "Authentication required", 401);
     }
   }
-  
+
   // Return video...
 };
 ```
@@ -1750,6 +1822,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
 ### 5.2 Database Migrations (Jeśli potrzebne)
 
 **Aktualna struktura `videos` table:**
+
 - Zawiera już pole `is_premium`
 - RLS policies muszą być zaktualizowane (patrz sekcja 4.4.1)
 
@@ -1758,6 +1831,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
 ### 5.3 Environment Setup
 
 **Nowe zmienne środowiskowe:**
+
 ```bash
 # .env (production)
 PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -1770,22 +1844,20 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 ```
 
 **Validation przy starcie:**
+
 ```typescript
 // src/lib/utils/env-check.ts (rozszerzenie istniejącego)
 
 export function checkAuthEnvVariables(): boolean {
-  const required = [
-    "PUBLIC_SUPABASE_URL",
-    "PUBLIC_SUPABASE_ANON_KEY"
-  ];
-  
-  const missing = required.filter(key => !import.meta.env[key]);
-  
+  const required = ["PUBLIC_SUPABASE_URL", "PUBLIC_SUPABASE_ANON_KEY"];
+
+  const missing = required.filter((key) => !import.meta.env[key]);
+
   if (missing.length > 0) {
     console.error(`❌ Missing auth environment variables: ${missing.join(", ")}`);
     return false;
   }
-  
+
   return true;
 }
 ```
@@ -1797,6 +1869,7 @@ export function checkAuthEnvVariables(): boolean {
 ### 6.1 Manual Testing Checklist
 
 **Invite Flow Tests (US-05):**
+
 - [ ] Admin wysyła invite przez Supabase Dashboard
 - [ ] User otrzymuje "Invite User Email"
 - [ ] Kliknięcie invite link → konto utworzone automatycznie
@@ -1805,6 +1878,7 @@ export function checkAuthEnvVariables(): boolean {
 - [ ] Invite link wygasł - error page
 
 **Magic Link Flow Tests (US-06):**
+
 - [ ] Wysłanie magic link - sukces (existing user)
 - [ ] Wysłanie magic link - email nie istnieje (jednolity komunikat sukcesu)
 - [ ] Kliknięcie magic link - auto login
@@ -1812,15 +1886,18 @@ export function checkAuthEnvVariables(): boolean {
 - [ ] Ponowne wysłanie magic link - throttling działa
 
 **OAuth Flow Tests (FR-12 - Optional):**
+
 - [ ] Google OAuth - sukces
 - [ ] Google OAuth - user cancels
 
 **Session Management Tests:**
+
 - [ ] Wylogowanie - session cleared
 - [ ] Session refresh - auto refresh po 55 min
 - [ ] Multiple tabs - session sync
 
 **Access Control Tests:**
+
 - [ ] Free user - dostęp do free content ✅
 - [ ] Free user - próba dostępu do premium → gate UI (PremiumGate)
 - [ ] Premium user - dostęp do premium content ✅
@@ -1828,6 +1905,7 @@ export function checkAuthEnvVariables(): boolean {
 - [ ] Admin - dostęp do wszystkich treści ✅
 
 **Role Management Tests (US-15):**
+
 - [ ] Admin zmienia rolę free → premium przez Dashboard
 - [ ] Nowa rola propaguje się w kolejnym request
 - [ ] User z nową rolą premium ma dostęp do premium content
@@ -1835,6 +1913,7 @@ export function checkAuthEnvVariables(): boolean {
 - [ ] User z rolą free traci dostęp do premium content
 
 **Edge Cases:**
+
 - [ ] User już zalogowany - redirect z /auth/login do /
 - [ ] Multiple tabs - session sync
 - [ ] Browser back button po logout
@@ -1844,6 +1923,7 @@ export function checkAuthEnvVariables(): boolean {
 ### 6.2 Automated Testing (Future - Optional)
 
 **Playwright E2E Tests:**
+
 ```typescript
 // tests/auth.spec.ts (przykład)
 
@@ -1852,19 +1932,19 @@ test.describe("Authentication", () => {
     await page.goto("/auth/login");
     await page.fill('input[type="email"]', "test@example.com");
     await page.click('button[type="submit"]');
-    
+
     // Verify redirect to verify-email page
     await expect(page).toHaveURL(/\/auth\/verify-email/);
     await expect(page.locator("text=Sprawdź swoją skrzynkę")).toBeVisible();
   });
-  
+
   test("should redirect logged-in user from login page", async ({ page }) => {
     // Login first
     await loginUser(page, "premium@example.com");
-    
+
     // Try to access login page
     await page.goto("/auth/login");
-    
+
     // Should redirect to home
     await expect(page).toHaveURL("/");
   });
@@ -1878,6 +1958,7 @@ test.describe("Authentication", () => {
 ### 7.1 Production Checklist
 
 **Supabase Configuration:**
+
 - [ ] Email templates customized and tested
 - [ ] Redirect URLs configured for production domain
 - [ ] RLS policies enabled on all tables
@@ -1885,11 +1966,13 @@ test.describe("Authentication", () => {
 - [ ] Google OAuth credentials (if used)
 
 **Environment:**
+
 - [ ] Environment variables set in hosting platform
 - [ ] HTTPS enforced
 - [ ] CSP headers configured (optional but recommended)
 
 **Monitoring:**
+
 - [ ] Error tracking setup (Sentry, Supabase Dashboard)
 - [ ] Auth event logging
 - [ ] Rate limiting monitoring
@@ -1931,6 +2014,7 @@ Następujące funkcjonalności NIE są częścią obecnej specyfikacji, ale mog�
 ## 9. Implementation Roadmap
 
 ### Phase 1: Core Auth (Tydzień 1)
+
 - [ ] Setup Supabase Auth configuration
 - [ ] Configure Email Templates (Magic Link + **Invite**)
 - [ ] Update middleware with session management
@@ -1945,6 +2029,7 @@ Następujące funkcjonalności NIE są częścią obecnej specyfikacji, ale mog�
 - [ ] Test magic link flow end-to-end (US-06)
 
 ### Phase 2: Access Control (Tydzień 1-2)
+
 - [ ] Update RLS policies in Supabase
 - [ ] Add auth checks to `/video/[id].astro`
 - [ ] Create `auth.server.ts` utilities (requireAuth, requireRole)
@@ -1952,6 +2037,7 @@ Następujące funkcjonalności NIE są częścią obecnej specyfikacji, ale mog�
 - [ ] Test redirect flows for unauthorized access
 
 ### Phase 3: Validators & Error Handling (Tydzień 2)
+
 - [ ] Create `auth.validator.ts` with Zod schemas
 - [ ] Integrate validation in LoginForm
 - [ ] Create error utility functions
@@ -1959,6 +2045,7 @@ Następujące funkcjonalności NIE są częścią obecnej specyfikacji, ale mog�
 - [ ] Add toast notifications for auth events
 
 ### Phase 4: OAuth & Polish (Tydzień 2)
+
 - [ ] Setup Google OAuth in Supabase Dashboard
 - [ ] Create `GoogleAuthButton.tsx` component
 - [ ] Add Google login to `/auth/login`
@@ -1967,6 +2054,7 @@ Następujące funkcjonalności NIE są częścią obecnej specyfikacji, ale mog�
 - [ ] Final testing of all flows
 
 ### Phase 5: Optional Enhancements (Tydzień 3 - jeśli czas pozwala)
+
 - [ ] Create `/api/auth/session` endpoint
 - [ ] Create `/api/auth/verify-email` endpoint with rate limiting
 - [ ] Add session refresh on visibility change
@@ -2106,10 +2194,12 @@ src/
 #### ✅ POPRAWIONE: Flow dla Nowych Użytkowników
 
 **Problem:**
+
 - Oryginalna wersja auth-spec.md opisywała "Nowego Użytkownika" jako osobę, która idzie na `/auth/login` i wpisuje email
 - To było SPRZECZNE z PRD sekcja 7.1, która wyraźnie mówi: "Admin wysyła zaproszenie przez Supabase"
 
 **Rozwiązanie:**
+
 - Dodano wyraźne rozróżnienie między **INVITE Flow** (nowi użytkownicy) a **Magic Link Flow** (istniejący użytkownicy)
 - Scenariusz 1 zmieniony na "Invite Flow" zgodnie z US-05
 - Scenariusz 2 wyraźnie oznaczony jako "dla istniejących użytkowników" zgodnie z US-06
@@ -2117,10 +2207,12 @@ src/
 #### ✅ POPRAWIONE: Callback Handler
 
 **Problem:**
+
 - Oryginalny callback obsługiwał tylko `type: "magiclink"`
 - Nie obsługiwał `type: "invite"` wymaganego przez PRD
 
 **Rozwiązanie:**
+
 - Callback handler aktualizowany do obsługi obu typów: `invite` i `magiclink`
 - Dodano walidację typu
 - Dodano wyjaśnienie że dla invite - konto jest tworzone automatycznie
@@ -2128,9 +2220,11 @@ src/
 #### ✅ POPRAWIONE: Email Enumeration Prevention
 
 **Problem:**
+
 - Oryginalny error message "Nie znaleziono użytkownika..." ujawniał czy email istnieje w systemie
 
 **Rozwiązanie:**
+
 - Zmieniono na jednolity komunikat "Link wysłany na podany adres email"
 - Zapobiega Email Enumeration Attack
 - Zgodne z security best practices
@@ -2138,9 +2232,11 @@ src/
 #### ✅ DODANE: Invite Flow w Email Templates
 
 **Problem:**
+
 - Brak szczegółowego opisu jak admin wysyła invite
 
 **Rozwiązanie:**
+
 - Dodano szczegółowe instrukcje w sekcji 4.3.2
 - Opisano proces invite przez Supabase Dashboard
 - Dodano przykład ustawiania user_metadata podczas invite
@@ -2148,9 +2244,11 @@ src/
 #### ✅ DODANE: Role Upgrade Scenario
 
 **Problem:**
+
 - Brak opisu jak free user może zostać upgraded do premium
 
 **Rozwiązanie:**
+
 - Dodano Scenariusz 9: "Upgrade Roli Free → Premium"
 - Opisano manual process przez Supabase Dashboard (zgodnie z PRD - bez płatności online)
 - Wyjaśniono automatyczną propagację nowej roli
@@ -2158,25 +2256,27 @@ src/
 #### ✅ DODANE: Informacja dla Nowych Użytkowników na /auth/login
 
 **Problem:**
+
 - Strona `/auth/login` nie informowała że nowi użytkownicy potrzebują invite
 
 **Rozwiązanie:**
+
 - Dodano sekcję z informacją: "Nie masz jeszcze konta? Skontaktuj się z admin@example.com"
 - Wyraźnie komunikuje że self-service registration nie jest możliwa
 
 ### 12.3 Zweryfikowane User Stories - Pełna Zgodność
 
-| User Story | Implementacja w auth-spec.md | Status |
-|------------|------------------------------|--------|
-| **US-05**: Zaproszenie email | ✅ Scenariusz 1: Invite Flow, sekcja 4.3.2 | **ZWERYFIKOWANE** |
-| **US-06**: Magic link login | ✅ Scenariusz 2: Magic Link Flow | **ZWERYFIKOWANE** |
-| **US-07**: Status w navbar | ✅ AuthButton component, Navbar | **ZWERYFIKOWANE** |
-| **US-15**: Zarządzanie rolami | ✅ Sekcja 4.3.2, Scenariusz 9 | **ZWERYFIKOWANE** |
-| **FR-09**: System zaproszeń | ✅ Sekcja 4.3.2, Email Templates | **ZWERYFIKOWANE** |
-| **FR-10**: Magic link | ✅ LoginForm, Scenariusz 2 | **ZWERYFIKOWANE** |
-| **FR-11**: Auto login + redirect | ✅ Callback handler | **ZWERYFIKOWANE** |
-| **FR-12**: Google OAuth (optional) | ✅ Phase 4, GoogleAuthButton | **ZWERYFIKOWANE** |
-| **FR-13**: Minimalne dane użytkownika | ✅ User Metadata Schema (sekcja 4.3.1) | **ZWERYFIKOWANE** |
+| User Story                            | Implementacja w auth-spec.md               | Status            |
+| ------------------------------------- | ------------------------------------------ | ----------------- |
+| **US-05**: Zaproszenie email          | ✅ Scenariusz 1: Invite Flow, sekcja 4.3.2 | **ZWERYFIKOWANE** |
+| **US-06**: Magic link login           | ✅ Scenariusz 2: Magic Link Flow           | **ZWERYFIKOWANE** |
+| **US-07**: Status w navbar            | ✅ AuthButton component, Navbar            | **ZWERYFIKOWANE** |
+| **US-15**: Zarządzanie rolami         | ✅ Sekcja 4.3.2, Scenariusz 9              | **ZWERYFIKOWANE** |
+| **FR-09**: System zaproszeń           | ✅ Sekcja 4.3.2, Email Templates           | **ZWERYFIKOWANE** |
+| **FR-10**: Magic link                 | ✅ LoginForm, Scenariusz 2                 | **ZWERYFIKOWANE** |
+| **FR-11**: Auto login + redirect      | ✅ Callback handler                        | **ZWERYFIKOWANE** |
+| **FR-12**: Google OAuth (optional)    | ✅ Phase 4, GoogleAuthButton               | **ZWERYFIKOWANE** |
+| **FR-13**: Minimalne dane użytkownika | ✅ User Metadata Schema (sekcja 4.3.1)     | **ZWERYFIKOWANE** |
 
 ### 12.4 Kluczowe Założenia Potwierdzone z PRD
 

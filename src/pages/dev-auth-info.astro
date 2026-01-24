@@ -1,0 +1,212 @@
+---
+/**
+ * Development Auth Info Page
+ *
+ * Shows authentication info and helps with testing
+ * Only available in development mode
+ */
+
+// Only allow in development
+if (import.meta.env.PROD) {
+  return Astro.redirect("/");
+}
+
+import Layout from "@/layouts/Layout.astro";
+
+const supabase = Astro.locals.supabase;
+const user = Astro.locals.user;
+
+// Get session info
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+---
+
+<Layout title="Dev Auth Info - YogaFit">
+  <main class="min-h-screen bg-background p-8">
+    <div class="max-w-4xl mx-auto space-y-8">
+      <div class="bg-yellow-100 dark:bg-yellow-900/20 border-2 border-yellow-500 rounded-lg p-6">
+        <h1 class="text-3xl font-bold text-yellow-900 dark:text-yellow-100 mb-2">⚠️ Development Mode Only</h1>
+        <p class="text-yellow-800 dark:text-yellow-200">
+          This page is only available in development and will not work in production.
+        </p>
+      </div>
+
+      <div class="bg-card border border-border rounded-lg p-6 space-y-4">
+        <h2 class="text-2xl font-bold">Current Authentication Status</h2>
+
+        <div class="space-y-3">
+          <div>
+            <strong>User:</strong>
+            {
+              user ? (
+                <span class="text-green-600 dark:text-green-400"> ✅ Logged In</span>
+              ) : (
+                <span class="text-red-600 dark:text-red-400"> ❌ Not Logged In</span>
+              )
+            }
+          </div>
+
+          {
+            user && (
+              <>
+                <div>
+                  <strong>Email:</strong> <code class="bg-muted px-2 py-1 rounded">{user.email}</code>
+                </div>
+                <div>
+                  <strong>User ID:</strong> <code class="bg-muted px-2 py-1 rounded text-xs">{user.id}</code>
+                </div>
+                <div>
+                  <strong>Created:</strong> {new Date(user.created_at).toLocaleString("pl-PL")}
+                </div>
+              </>
+            )
+          }
+
+          <div>
+            <strong>Session:</strong>
+            {
+              session ? (
+                <span class="text-green-600 dark:text-green-400"> ✅ Active</span>
+              ) : (
+                <span class="text-red-600 dark:text-red-400"> ❌ No Session</span>
+              )
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card border border-border rounded-lg p-6 space-y-4">
+        <h2 class="text-2xl font-bold">Testing Tips</h2>
+
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Hit Rate Limit?</h3>
+            <ol class="list-decimal list-inside space-y-2 text-sm">
+              <li>
+                Use email aliases (Gmail: <code>youremail+test1@gmail.com</code>)
+              </li>
+              <li>Go to Supabase Dashboard → Authentication → Rate Limits</li>
+              <li>Increase "Email send rate" to 100/hour</li>
+              <li>Or wait 60 minutes for rate limit to reset</li>
+            </ol>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Quick Links</h3>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="https://supabase.com/dashboard/project/ckeeneggpukpwgkjcpnc/auth/rate-limits"
+                  target="_blank"
+                  class="text-primary hover:underline"
+                >
+                  📊 Supabase Rate Limits Settings
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://supabase.com/dashboard/project/ckeeneggpukpwgkjcpnc/auth/users"
+                  target="_blank"
+                  class="text-primary hover:underline"
+                >
+                  👥 Supabase Users Dashboard
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://supabase.com/dashboard/project/ckeeneggpukpwgkjcpnc/logs/edge-logs"
+                  target="_blank"
+                  class="text-primary hover:underline"
+                >
+                  📝 Supabase Logs
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Email Aliases for Testing</h3>
+            <p class="text-sm text-muted-foreground mb-2">
+              Use these patterns to test with different "emails" that all go to your inbox:
+            </p>
+            <ul class="space-y-1 text-sm font-mono bg-muted p-3 rounded">
+              <li>youremail+test1@gmail.com</li>
+              <li>youremail+test2@gmail.com</li>
+              <li>youremail+test3@gmail.com</li>
+              <li>youremail+dev1@gmail.com</li>
+            </ul>
+            <p class="text-xs text-muted-foreground mt-2">All these emails arrive in youremail@gmail.com inbox</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card border border-border rounded-lg p-6 space-y-4">
+        <h2 class="text-2xl font-bold">Environment Variables</h2>
+
+        <div class="space-y-2 text-sm font-mono">
+          <div>
+            <strong>PUBLIC_SUPABASE_URL:</strong>
+            <br />
+            <code class="bg-muted px-2 py-1 rounded text-xs">
+              {import.meta.env.PUBLIC_SUPABASE_URL || "Not set"}
+            </code>
+          </div>
+          <div>
+            <strong>PUBLIC_SUPABASE_ANON_KEY:</strong>
+            <br />
+            <code class="bg-muted px-2 py-1 rounded text-xs">
+              {
+                import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+                  ? import.meta.env.PUBLIC_SUPABASE_ANON_KEY.substring(0, 30) + "..."
+                  : "Not set"
+              }
+            </code>
+          </div>
+          <div>
+            <strong>MODE:</strong>
+            <code class="bg-muted px-2 py-1 rounded">
+              {import.meta.env.DEV ? "Development" : "Production"}
+            </code>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <a
+          href="/auth/login"
+          class="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+        >
+          Go to Login
+        </a>
+
+        {
+          user ? (
+            <form action="/api/auth/logout" method="POST">
+              <button
+                type="submit"
+                class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+              >
+                Logout
+              </button>
+            </form>
+          ) : (
+            <a
+              href="/auth/register"
+              class="px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
+            >
+              Go to Register
+            </a>
+          )
+        }
+
+        <a
+          href="/"
+          class="px-6 py-3 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 transition-colors"
+        >
+          Home
+        </a>
+      </div>
+    </div>
+  </main>
+</Layout>
