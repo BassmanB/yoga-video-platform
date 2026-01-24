@@ -4,12 +4,21 @@ A modern video platform for yoga, mobility, and calisthenics content with premiu
 
 ## Tech Stack
 
+### Core Technologies
+
 - [Astro](https://astro.build/) v5 - Modern web framework with SSR
 - [React](https://react.dev/) v19 - UI library for interactive components
 - [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
 - [Tailwind CSS](https://tailwindcss.com/) v4 - Utility-first CSS framework
 - [Shadcn/ui](https://ui.shadcn.com/) - Beautiful, accessible UI components
 - [Supabase](https://supabase.com/) - Backend with PostgreSQL, Auth & Storage
+
+### Testing
+
+- [Vitest](https://vitest.dev/) - Unit testing framework with native ESM support
+- [Playwright](https://playwright.dev/) - End-to-end testing framework
+- [React Testing Library](https://testing-library.com/react) - Component testing utilities
+- [axe DevTools](https://www.deque.com/axe/devtools/) - Accessibility testing
 
 ## Prerequisites
 
@@ -74,6 +83,10 @@ npm run build
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
+- `npm run test` - Run unit tests with Vitest
+- `npm run test:ui` - Run unit tests with interactive UI
+- `npm run test:e2e` - Run end-to-end tests with Playwright
+- `npm run test:e2e:ui` - Run E2E tests with Playwright UI
 
 ## Project Structure
 
@@ -110,6 +123,56 @@ npm run build
 - ⚡ **Performance**: SSR with Astro, client-side hydration for interactivity
 - ♿ **Accessible**: WCAG compliant with keyboard navigation
 - 📱 **Responsive**: Mobile-first design that works on all devices
+
+## Testing
+
+This project includes comprehensive testing coverage:
+
+### Unit Tests (Vitest)
+
+Unit tests cover critical functions, hooks, and utilities:
+
+```bash
+# Run all unit tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with UI
+npm run test:ui
+
+# Generate coverage report
+npm run test:coverage
+```
+
+Target coverage: **>70% for critical paths**
+
+### E2E Tests (Playwright)
+
+End-to-end tests cover user flows and integrations:
+
+```bash
+# Run all E2E tests
+npm run test:e2e
+
+# Run E2E tests with UI
+npm run test:e2e:ui
+
+# Run specific test file
+npm run test:e2e -- auth.spec.ts
+```
+
+Target coverage: **>50% of main user flows**
+
+### Test Strategy
+
+- **Unit Tests**: Authentication logic, data transformations, API utilities
+- **Component Tests**: React components with React Testing Library
+- **E2E Tests**: Critical user flows (login, video playback, premium gate)
+- **Accessibility Tests**: Automated WCAG compliance checks with axe
+
+See `.ai/test-plan.mdc` for detailed testing documentation.
 
 ## AI Development Support
 
