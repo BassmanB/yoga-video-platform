@@ -1,20 +1,53 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
-test.describe("Home Page", () => {
-  test("should load successfully", async ({ page }) => {
-    await page.goto("/");
+/**
+ * Basic Home Page Tests
+ *
+ * Simple smoke tests to verify homepage loads correctly
+ */
 
-    // Wait for the page to be fully loaded
-    await page.waitForLoadState("networkidle");
+test.describe("Home Page - Basic", () => {
+  test("should load successfully", async ({ homePage, page }) => {
+    // Arrange & Act
+    await homePage.goto();
+    await homePage.waitForLoad();
 
-    // Check that we're on the homepage
+    // Assert: Page loaded successfully
     expect(page.url()).toContain("localhost:4321");
   });
 
-  test("should have correct title", async ({ page }) => {
-    await page.goto("/");
+  test("should have correct title", async ({ homePage, page }) => {
+    // Arrange & Act
+    await homePage.goto();
 
-    // Check for page title
-    await expect(page).toHaveTitle(/.*/);
+    // Assert: Page has a title
+    await expect(page).toHaveTitle(/.+/);
+  });
+
+  test("should display navbar", async ({ homePage }) => {
+    // Arrange & Act
+    await homePage.goto();
+    await homePage.waitForLoad();
+
+    // Assert: Navbar is visible
+    await expect(homePage.navbar).toBeVisible();
+  });
+
+  test("should display video grid", async ({ homePage }) => {
+    // Arrange & Act
+    await homePage.goto();
+    await homePage.waitForLoad();
+
+    // Assert: Video grid is visible
+    await expect(homePage.videoGrid).toBeVisible();
+  });
+
+  test("should display filter bar", async ({ homePage }) => {
+    // Arrange & Act
+    await homePage.goto();
+    await homePage.waitForLoad();
+
+    // Assert: Filter bar is visible
+    await expect(homePage.filterBar).toBeVisible();
   });
 });
