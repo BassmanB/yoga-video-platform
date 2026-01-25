@@ -4,10 +4,11 @@
  * Displays a grid of video cards with loading, error, and empty states
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useVideos } from "../lib/hooks/useVideos";
 import { useAuth } from "../lib/hooks/useAuth";
 import type { VideoListQueryParams } from "../types";
+import { isVideoCategory, isVideoLevel } from "../types";
 import { VideoCard } from "./VideoCard";
 import { SkeletonLoader } from "./SkeletonLoader";
 import { EmptyState } from "./EmptyState";
@@ -19,7 +20,37 @@ interface VideoGridProps {
 
 export function VideoGrid({ initialParams }: VideoGridProps) {
   const { role } = useAuth();
-  const { videos, isLoading, error, refetch } = useVideos(initialParams);
+  const [params, setParams] = useState<VideoListQueryParams>(initialParams);
+  const { videos, isLoading, error, refetch } = useVideos(params);
+
+  // Listen to URL changes and update params
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const url = new URL(window.location.href);
+      const categoryParam = url.searchParams.get("category");
+      const levelParam = url.searchParams.get("level");
+
+      const category = categoryParam && isVideoCategory(categoryParam) ? categoryParam : undefined;
+      const level = levelParam && isVideoLevel(levelParam) ? levelParam : undefined;
+
+      setParams({
+        ...initialParams,
+        category: category as any,
+        level: level as any,
+      });
+    };
+
+    // Listen to popstate (back/forward buttons)
+    window.addEventListener("popstate", handleUrlChange);
+
+    // Listen to custom event for filter changes
+    window.addEventListener("filterchange", handleUrlChange);
+
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange);
+      window.removeEventListener("filterchange", handleUrlChange);
+    };
+  }, [initialParams]);
 
   // Handle error with toast notification
   useEffect(() => {
@@ -53,6 +84,7 @@ export function VideoGrid({ initialParams }: VideoGridProps) {
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       role="list"
       aria-label="Lista nagrań wideo"
+      data-testid="video-grid"
     >
       {videos.map((video) => (
         <VideoCard key={video.id} video={video} userRole={role} />

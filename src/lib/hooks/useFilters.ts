@@ -45,6 +45,9 @@ export function useFilters(options: UseFiltersOptions = {}): UseFiltersResult {
     }
 
     window.history.pushState({}, "", url);
+
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event("filterchange"));
   }, []);
 
   /**

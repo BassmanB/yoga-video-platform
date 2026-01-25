@@ -38,6 +38,7 @@ export function VideoCard({ video, userRole }: VideoCardProps) {
       tabIndex={0}
       role="article"
       aria-label={`${video.title} - ${formatDuration(video.duration)}`}
+      data-testid="video-card"
     >
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden rounded-t-2xl bg-muted">
@@ -47,13 +48,22 @@ export function VideoCard({ video, userRole }: VideoCardProps) {
           onError={() => setImageError(true)}
           loading="lazy"
           className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${!hasAccess ? "blur-md" : ""}`}
+          data-testid="video-thumbnail"
         />
 
         {/* Premium Badge */}
-        {video.is_premium && <Badge className="absolute top-3 right-3 bg-gradient-sunset shadow-glow">Premium</Badge>}
+        {video.is_premium && (
+          <Badge className="absolute top-3 right-3 bg-gradient-sunset shadow-glow" data-testid="premium-badge">
+            Premium
+          </Badge>
+        )}
 
         {/* Duration Badge */}
-        <Badge variant="secondary" className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm">
+        <Badge
+          variant="secondary"
+          className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm"
+          data-testid="video-duration"
+        >
           {formatDuration(video.duration).formatted}
         </Badge>
 
@@ -67,10 +77,16 @@ export function VideoCard({ video, userRole }: VideoCardProps) {
 
       {/* Content */}
       <CardContent className="p-5">
-        <h3 className="font-heading font-semibold text-lg text-foreground line-clamp-2 mb-3">{video.title}</h3>
+        <h3 className="font-heading font-semibold text-lg text-foreground line-clamp-2 mb-3" data-testid="video-title">
+          {video.title}
+        </h3>
         <div className="flex gap-2 flex-wrap">
-          <Badge variant="outline">{getCategoryLabel(video.category)}</Badge>
-          <Badge variant="outline">{getLevelLabel(video.level)}</Badge>
+          <Badge variant="outline" data-testid="video-category">
+            {getCategoryLabel(video.category)}
+          </Badge>
+          <Badge variant="outline" data-testid="video-level">
+            {getLevelLabel(video.level)}
+          </Badge>
         </div>
       </CardContent>
     </Card>
