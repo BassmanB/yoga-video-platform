@@ -1,6 +1,6 @@
 # Yoga & Fitness Video Platform
 
-A modern video platform for yoga, mobility, and calisthenics content with premium access control.
+A modern video platform for yoga, mobility, and calisthenics content with freemium premium access control.
 
 ## Tech Stack
 
@@ -25,7 +25,7 @@ A modern video platform for yoga, mobility, and calisthenics content with premiu
 - Node.js v22.14.0 (as specified in `.nvmrc`)
 - npm (comes with Node.js)
 
-## Getting Started
+## Getting Started 
 
 1. Clone the repository:
 

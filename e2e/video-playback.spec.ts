@@ -11,7 +11,7 @@ import { test, expect, TEST_VIDEOS, authenticateUser } from "./fixtures";
  */
 
 test.describe("Video Detail Page", () => {
-  test("should display video player on video page", async ({ page, videoPage }) => {
+  test("should display video player on video page", async ({ videoPage }) => {
     // Arrange: Navigate to free video
     await videoPage.goto(TEST_VIDEOS.free);
     await videoPage.waitForLoad();
@@ -239,7 +239,7 @@ test.describe("Video Player Keyboard Controls", () => {
     await page.waitForTimeout(500);
 
     // Assert: Video is in fullscreen
-    const isFullscreen = await page.evaluate(() => {
+    await page.evaluate(() => {
       return document.fullscreenElement !== null;
     });
 
@@ -291,7 +291,7 @@ test.describe("Video Loading States", () => {
 
     // Assert: Loading indicator appears (if implemented)
     // This depends on your implementation
-    const loadingIndicator = page.getByTestId("video-loading");
+    page.getByTestId("video-loading");
 
     // Note: Loading might be too fast to catch in tests
     // You might need to throttle network in CI

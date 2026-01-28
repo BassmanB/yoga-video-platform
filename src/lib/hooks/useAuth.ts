@@ -65,6 +65,7 @@ export function useAuth(): UseAuthResult {
     const redirectParam = currentPath !== "/" ? `?redirect=${encodeURIComponent(currentPath)}` : "";
 
     // Redirect to login page
+    // eslint-disable-next-line react-compiler/react-compiler
     window.location.href = `/auth/login${redirectParam}`;
   };
 

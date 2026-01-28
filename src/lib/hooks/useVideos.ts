@@ -4,7 +4,7 @@
  * Fetches and manages video list data from API
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Video, VideoListResponse, VideoListQueryParams, PaginationMeta } from "../../types";
 import type { UseVideosResult } from "../types/view-models";
 
@@ -20,7 +20,7 @@ export function useVideos(params: VideoListQueryParams): UseVideosResult {
   const [error, setError] = useState<Error | null>(null);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
 
-  const fetchVideos = async () => {
+  const fetchVideos = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -64,20 +64,11 @@ export function useVideos(params: VideoListQueryParams): UseVideosResult {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params]);
 
   useEffect(() => {
     fetchVideos();
-  }, [
-    params.category,
-    params.level,
-    params.is_premium,
-    params.status,
-    params.limit,
-    params.offset,
-    params.sort,
-    params.order,
-  ]);
+  }, [fetchVideos]);
 
   return {
     videos,
