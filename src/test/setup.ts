@@ -14,10 +14,20 @@ Object.defineProperty(window, "matchMedia", {
     matches: false,
     media: query,
     onchange: null,
-    addListener: () => {}, // deprecated
-    removeListener: () => {}, // deprecated
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => {},
+    addListener: () => {
+      // deprecated
+    },
+    removeListener: () => {
+      // deprecated
+    },
+    addEventListener: () => {
+      // no-op
+    },
+    removeEventListener: () => {
+      // no-op
+    },
+    dispatchEvent: () => {
+      // no-op
+    },
   }),
 });

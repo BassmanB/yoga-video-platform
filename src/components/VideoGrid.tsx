@@ -35,8 +35,8 @@ export function VideoGrid({ initialParams }: VideoGridProps) {
 
       setParams({
         ...initialParams,
-        category: category as any,
-        level: level as any,
+        category,
+        level,
       });
     };
 

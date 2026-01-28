@@ -27,7 +27,7 @@ test.describe("Video Browsing", () => {
     expect(videoCount).toBeGreaterThan(0);
   });
 
-  test("should display video card information", async ({ homePage, page }) => {
+  test("should display video card information", async ({ homePage }) => {
     // Assert: First video card has required information
     const firstCard = homePage.videoCards.first();
 
