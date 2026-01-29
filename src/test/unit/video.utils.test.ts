@@ -1,6 +1,6 @@
 /**
  * Unit tests for video.utils.ts
- * 
+ *
  * Tests cover validation utilities, access control, formatting, and error handling
  * with focus on business rules and edge cases.
  */
@@ -17,7 +17,7 @@ import {
   getLevelColor,
   getErrorMessage,
 } from "@/lib/utils/video.utils";
-import type { Video, UserRole } from "@/types";
+import type { Video } from "@/types";
 
 // ============================================================================
 // VALIDATION UTILITIES
@@ -51,10 +51,10 @@ describe("isValidUUID", () => {
     });
 
     it("should reject non-string values", () => {
-      expect(isValidUUID(null as any)).toBe(false);
-      expect(isValidUUID(undefined as any)).toBe(false);
-      expect(isValidUUID(123 as any)).toBe(false);
-      expect(isValidUUID({} as any)).toBe(false);
+      expect(isValidUUID(null as unknown as string)).toBe(false);
+      expect(isValidUUID(undefined as unknown as string)).toBe(false);
+      expect(isValidUUID(123 as unknown as string)).toBe(false);
+      expect(isValidUUID({} as unknown as string)).toBe(false);
     });
 
     it("should reject UUID without hyphens", () => {
@@ -118,9 +118,9 @@ describe("isValidVideoUrl", () => {
     });
 
     it("should reject non-string values", () => {
-      expect(isValidVideoUrl(null as any)).toBe(false);
-      expect(isValidVideoUrl(undefined as any)).toBe(false);
-      expect(isValidVideoUrl(123 as any)).toBe(false);
+      expect(isValidVideoUrl(null as unknown as string)).toBe(false);
+      expect(isValidVideoUrl(undefined as unknown as string)).toBe(false);
+      expect(isValidVideoUrl(123 as unknown as string)).toBe(false);
     });
 
     it("should reject relative URLs", () => {
@@ -395,8 +395,8 @@ describe("formatDuration", () => {
     });
 
     it("should handle null/undefined as zero", () => {
-      expect(formatDuration(null as any).formatted).toBe("0:00");
-      expect(formatDuration(undefined as any).formatted).toBe("0:00");
+      expect(formatDuration(null as unknown as number).formatted).toBe("0:00");
+      expect(formatDuration(undefined as unknown as number).formatted).toBe("0:00");
     });
 
     it("should handle NaN as zero", () => {
@@ -560,7 +560,7 @@ describe("getCategoryLabel", () => {
   });
 
   it("should return original value for unknown category", () => {
-    expect(getCategoryLabel("unknown" as any)).toBe("unknown");
+    expect(getCategoryLabel("unknown" as never)).toBe("unknown");
   });
 });
 
@@ -578,7 +578,7 @@ describe("getLevelLabel", () => {
   });
 
   it("should return original value for unknown level", () => {
-    expect(getLevelLabel("unknown" as any)).toBe("unknown");
+    expect(getLevelLabel("unknown" as never)).toBe("unknown");
   });
 });
 
@@ -599,7 +599,7 @@ describe("getCategoryColor", () => {
   });
 
   it("should return slate colors for unknown category", () => {
-    const colors = getCategoryColor("unknown" as any);
+    const colors = getCategoryColor("unknown" as never);
     expect(colors).toContain("slate");
   });
 
@@ -628,7 +628,7 @@ describe("getLevelColor", () => {
   });
 
   it("should return slate colors for unknown level", () => {
-    const colors = getLevelColor("unknown" as any);
+    const colors = getLevelColor("unknown" as never);
     expect(colors).toContain("slate");
   });
 
@@ -676,12 +676,12 @@ describe("getErrorMessage", () => {
   });
 
   it("should return UNKNOWN message for unrecognized error type", () => {
-    const message = getErrorMessage("UNRECOGNIZED_ERROR" as any);
+    const message = getErrorMessage("UNRECOGNIZED_ERROR" as never);
     expect(message).toBe("Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.");
   });
 
   it("should return user-friendly messages in Polish", () => {
-    const errors: Array<"NOT_FOUND" | "NETWORK_ERROR" | "TIMEOUT" | "PLAYBACK_ERROR" | "INVALID_URL" | "UNKNOWN"> = [
+    const errors: ("NOT_FOUND" | "NETWORK_ERROR" | "TIMEOUT" | "PLAYBACK_ERROR" | "INVALID_URL" | "UNKNOWN")[] = [
       "NOT_FOUND",
       "NETWORK_ERROR",
       "TIMEOUT",

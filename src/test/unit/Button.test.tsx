@@ -21,7 +21,15 @@ function Button({ onClick, children }: { onClick: () => void; children: React.Re
 describe("Button", () => {
   it("should render button with text", () => {
     // Arrange & Act
-    render(<Button onClick={() => {}}>Click me</Button>);
+    render(
+      <Button
+        onClick={() => {
+          // no-op
+        }}
+      >
+        Click me
+      </Button>
+    );
 
     // Assert
     expect(screen.getByRole("button", { name: /click me/i })).toBeInTheDocument();

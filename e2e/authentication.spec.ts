@@ -76,7 +76,7 @@ test.describe("Authentication - Magic Link Flow", () => {
     expect(hasError).toBe(true);
   });
 
-  test("should redirect to homepage after successful login", async ({ page, authPage, homePage }) => {
+  test("should redirect to homepage after successful login", async ({ page, authPage }) => {
     // Note: This test requires a valid magic link token
     // In a real scenario, you would intercept the email or use a test API
 

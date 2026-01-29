@@ -46,7 +46,7 @@ test.describe("Premium Content - Unauthenticated User", () => {
     }
   });
 
-  test("should be denied access when trying to view premium video", async ({ page, videoPage }) => {
+  test("should be denied access when trying to view premium video", async ({ videoPage }) => {
     // Act: Navigate to premium video without authentication
     await videoPage.goto(TEST_VIDEOS.premium);
     await videoPage.waitForLoad();
@@ -335,7 +335,7 @@ test.describe("Premium Content - Access Control Edge Cases", () => {
 });
 
 test.describe("Premium Content - Visual Indicators", () => {
-  test("should have distinct visual styling for premium badges", async ({ page, homePage }) => {
+  test("should have distinct visual styling for premium badges", async ({ homePage }) => {
     // Arrange: Navigate to homepage
     await homePage.goto();
     await homePage.waitForLoad();
